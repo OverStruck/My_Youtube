@@ -1,0 +1,51 @@
+﻿<!doctype html>
+<html>
+    <head>
+        <title data-message="optionsHeaderTitle">Mi Youtube</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" type="text/css" href="css/options.css">
+    </head>
+    <body>
+        <div id="options">
+            <div id="logo"></div>
+            <div class="hbox">
+                <div class="groupbox flex1">
+                    <span data-message="opts1">Agregar youtubero</span>
+                    <input type="text" id="add-field">
+                    <button id="btn-add" disabled data-message="optsbtn1">Agregar</button>
+                    <div id="prefs">
+                        <div>
+                            <input type="checkbox" class="pref">
+                            <span data-message="opts2">Mostrar notificación</span>
+                        </div>
+                        <div>
+                            <input type="checkbox" class="pref">
+                            <span data-message="opts3">Reproducir sonido cuando se muestre una notificación</span>
+                        </div>
+                        <div>
+                            <span data-message="opts4">Comprobar si hay nuevos vídeos cada</span>
+                            <input type="text" class="pref">
+                            <span data-message="opts4b">minuto(s)</span>
+                        </div>
+                    </div>
+                    <!--<textarea id="add-txtArea"></textarea>-->
+                    <div style="margin-top:2em">
+                        <button id="btn-save" disabled data-message="optsbtn2">Guardar Configuración</button>
+                        <span id="response"></span>
+                    </div>
+                </div>
+                <div class="groupbox">
+                    <h2 data-message="optsHeader1">Youtuberos que sigues</h2>
+                    <div id="youtubers"></div>
+                    <div style="clear:both;padding-top:1em;">
+                        <button id="btn-del" disabled data-message="optsbtn3">Borrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="footer">Copyright &copy; <b>Juanix.net</b> 2013</div>
+        <script src="js/jquery2.js" type="text/javascript"></script>
+        <script src="js/Mi_Youtube_Data.js" type="text/javascript"></script>
+        <script src="js/options.js" type="text/javascript"></script>
+    </body>
+</html>

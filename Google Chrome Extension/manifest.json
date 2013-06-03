@@ -1,0 +1,35 @@
+{
+	"manifest_version": 2,
+
+	"name": "__MSG_extName__",
+	"description": "__MSG_extDescription__",
+	"version": "1.0",
+	"minimum_chrome_version": "25.0",
+	"background": {
+		"page": "background.html"
+	},
+	"options_page": "options.html",
+	"icons": {
+		"128": "images\\icons\\icon128.png",
+		"48": "images\\icons\\icon48.png",
+		"38": "images\\icons\\icon38.png",
+		"19": "images\\icons\\icon19.png",
+		"16": "images\\icons\\icon16.png"
+	},
+	"permissions": [
+        "tabs",
+        "storage",
+        "notifications",
+        "http://*.youtube.com/*",
+        "https://*.youtube.com/*"
+      ],
+	"browser_action": {
+		"default_icon": {
+			"19": "images\\icons\\icon19.png",
+			"38": "images\\icons\\icon38.png"
+		},
+	"default_title": "__MSG_extPopupTooltip__",
+	"default_popup": "popup.html"
+	},
+	"default_locale": "en"
+}

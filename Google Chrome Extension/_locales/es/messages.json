@@ -1,0 +1,106 @@
+{
+	"extName": {
+		"message": "Mi Youtube™",
+		"description": "The extension name"
+	},
+	"extDescription": {
+		"message": "Nunca te pierdas otro video de tus Youtuberos favoritos",
+		"description": "The extension description"
+	},
+	"extPopupTooltip": {
+		"message": "Mi Youtube",
+		"description": "The tooltip title of the popup"
+	},
+	"optionsHeaderTitle": {
+		"message": "Mi Youtube | Opciones"
+	},
+	"opts1": {
+		"message": "Agregar Youtubero"
+	},
+	"opts2": {
+		"message": "Mostrar notificación"
+	}
+	,
+	"opts3": {
+		"message": "Reproducir sonido de alarma cuando se encuentren nuevos videos"
+	},
+	"opts4": {
+		"message": "Comprobar si hay nuevos videos cada"
+	},
+	"opts4b": {
+		"message": "minuto(s)"
+	},
+	"optsHeader1": {
+		"message": "Youtuberos que sigues:"
+	},
+	"optsbtn1": {
+		"message": "Agregar"
+	},
+	"optsbtn2": {
+		"message": "Guardar cambios"
+	},
+	"optsbtn3": {
+		"message": "Borrar"
+	},
+	"notificationText": {
+		"message": "¡Hay <b>$VIDEOS$</b> nuevo$S$ video$S$!",
+		"placeholders": {
+			"videos": {
+				"content": "$1",
+				"example": "5"
+			},
+			"s": {
+				"content": "$2",
+				"example": "Esto puede ser 'video' (singular) o 'videos'(plural)"
+			}
+		}
+	},
+	"errMsg1": {
+		"message": "Tienes que escribir algo..."
+	},
+	"errMsg2": {
+		"message": "Ese Youtubero ya esta en tu lista..."
+	},
+	"errMsg3": {
+		"message": "Cuenta invalida..."
+	},
+	"errMsg4": {
+		"message": "El Youtubero agregado no tiene videos..."
+	},
+	"errMsg5": {
+		"message": "Un error desconocido ha pasado..."
+	},
+	"errMsg6": {
+		"message": "Cambios guardados exitosamente"
+	},
+	"errMsg7": {
+		"message": "No puedes escribir decimales en la opción #3\n\nSe ha guardado el valor predeterminado de 10"
+	},
+	"lang": {
+      "message": "es"
+  	},
+  	"newTxt": {
+  		"message": "NUEVO"
+  	},
+  	"popupE1_H": {
+  		"message": "Un error desconocido ha ocurrido"
+  	},
+  	"popupE1_B": {
+  		"message": "Esta cuenta no tiene videos"
+  	},
+  	"popupE2_H": {
+  		"message": "No se pudieron cargar los videos"
+  	},
+  	"popupE2_B": {
+  		"message": "Este error no deberia pasar. Posibles razones por las que pudo pasar incluyen:<br><ul><li>Algunos servicios de Youtube están abajo</li><li>No estas conectado al Internet</li></ul>Intenta cargar otra cuenta, si este error dura mas de 24 horas, <a target='_blank' href='http://www.juanix.net'>contáctame</a>"
+  	},
+  	"popupE3_H": {
+  		"message": "No hay nuevos videos :("
+  	},
+  	"popupE3_B": {
+  		"message": "Aun asi puedes ver videos dando click a cualquier cuenta en la barra de la derecha"
+  	},
+  	"popuph2": {
+  		"message": "Nuevos videos"
+  	}
+}

@@ -4,8 +4,6 @@ Youtubers have uploaded new videos.
 
 At the moment, My Youtube is only available for Google Chrome and can be installed from the Chrome Web Store using the
 following URL: https://chrome.google.com/webstore/detail/my-youtube/cphiahocnjphccbcpaabkhbppnilapeg
-
-<h3>The source code is released under the Mozilla Public License Version 1.1</h3>
  
 <h2>Important source files</h2>
 background.js - Main js script that checks for new videos in the background<br />

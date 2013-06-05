@@ -1,7 +1,7 @@
 //save extension data setup
 var ExtensionDataName = 'Mi_Youtube_Data',
 	ExtensionData = {
-	dataVersion: 2,
+	dataVersion: 2.1,
 	accounts: [
     {
         //default PMVTutoriales channel
@@ -35,12 +35,15 @@ function DB_load(callback) {
         if (isEmpty(r[ExtensionDataName])) {
             DB_setValue(ExtensionDataName, ExtensionData, callback);
         } else if (r[ExtensionDataName].dataVersion != ExtensionData.dataVersion) {
+            //update defaults values without losing already existing data to V2.1
+            if (r[ExtensionDataName].newVideosCache === undefined) {
+                r[ExtensionDataName].newVideosCache = [];
+            }
+            r[ExtensionDataName].dataVersion = ExtensionData.dataVersion;
+            ExtensionData = r[ExtensionDataName];
             DB_setValue(ExtensionDataName, ExtensionData, callback);
         } else {
             ExtensionData = r[ExtensionDataName];
-            if (!r[ExtensionDataName]) {
-                ExtensionData.newVideosCache = [];
-            }
             callback();
         }
     });

@@ -5,6 +5,7 @@ for (var i = 0; i < objects.length; i++) {
 		objects[i].innerHTML = chrome.i18n.getMessage(objects[i].dataset.message);
 	}
 }
+$('#x').attr('href', '_locales/' + chrome.i18n.getMessage('lang') + '/history.html')
 DB_load(function() {
 	//dom elements
 	var fieldAdd = $('#add-field'),

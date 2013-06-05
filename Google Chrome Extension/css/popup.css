@@ -1,5 +1,6 @@
 html {
 	width:700px;
+	max-height: 586px;
 }
 body {
 	color: white;

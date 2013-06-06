@@ -117,6 +117,9 @@
    "popuph2": {
       "message": "Nuevos videos"
    },
+   "popupMsg1": {
+      "message": "Comprobando videos de: "
+   },
    "popup_tooltip": {
       "message": "Video subido por $NAME$",
       "placeholders": {
@@ -125,9 +128,6 @@
             "example": "PMVTutoriales"
          }
       }
-   },
-   "popupMsg1": {
-      "message": "Comprobando videos de: "
    },
    "thx1": {
       "message": "¡Gracias por usar Mi YouTube™!"
@@ -152,5 +152,11 @@
    },
    "thx2b": {
       "message": "Da clic a 'Me gusta' :)"
+   },
+   "contextMenu": {
+      "message": "Marcar video como visto"
+   },
+   "contextMenuMsg": {
+      "message": "Ya has visto este video .-."
    }
 }

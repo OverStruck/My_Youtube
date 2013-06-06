@@ -17,6 +17,16 @@
 		});
 		return false;
 	}
+
+	//create menu
+	chrome.contextMenus.create({
+		id: "mark-as-watched",
+		title: chrome.i18n.getMessage('contextMenu'),
+		contexts: ["image"],
+		documentUrlPatterns: ["chrome-extension://*/nyz_popup.html"],
+		targetUrlPatterns: ["https://i.ytimg.com/*/mqdefault.jpg", "http://i.ytimg.com/*/mqdefault.jpg"]
+	});
+
 	var totalNewVideos = 0,
 		newVideosHash = '',
 		oldVideosHash = '',

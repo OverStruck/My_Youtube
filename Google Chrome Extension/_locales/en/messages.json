@@ -79,6 +79,12 @@
    "opts5": {
       "message": "Open videos in the current tab"
    },
+   "optsFooter": {
+      "message": "What's new?"
+   },
+   "optsFooter2": {
+      "message": "Options"
+   },
    "optsHeader1": {
       "message": "Youtubers you're following:"
    },
@@ -93,12 +99,6 @@
    },
    "optsbtn4": {
       "message": "Clean cache"
-   },
-   "optsFooter": {
-      "message": "What's new?"
-   },
-   "optsFooter2": {
-      "message": "Options"
    },
    "popupE1_B": {
       "message": "This account has no videos"
@@ -121,6 +121,9 @@
    "popuph2": {
       "message": "New Videos"
    },
+   "popupMsg1": {
+      "message": "Checking videos from: "
+   },
    "popup_tooltip": {
       "message": "Video uploaded by $NAME$",
       "placeholders": {
@@ -130,11 +133,8 @@
          }
       }
    },
-   "popupMsg1": {
-      "message": "Checking videos from: "
-   },
    "thx1": {
-      "message": "Thanks for using My YouTube™!"
+      "message": "Thanks for using My YouTube\u2122!"
    },
    "thx2": {
       "message": "Don't forget to..."
@@ -156,5 +156,11 @@
    },
    "thx2b": {
       "message": "Share this extension with your friends on Facebook :)"
+   },
+    "contextMenu": {
+      "message": "Mark video as watched"
+   },
+   "contextMenuMsg": {
+      "message": "You've already watched this video .-."
    }
 }

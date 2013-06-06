@@ -83,7 +83,7 @@ body {
 	clear: both;
 }
 .modal {
-    position:   fixed;
+    position:   absolute;
     z-index:    1000;
     top:        0;
     left:       0;
@@ -93,6 +93,14 @@ body {
                 url(../images/loading.gif) 
                 50% 50% 
                 no-repeat;
+}
+.modal div {
+    position:   absolute;
+    z-index:    2000;
+    top:        55%;
+    width:      100%;
+    text-align: center;
+	color: black;
 }
 a {
 	text-decoration: none;

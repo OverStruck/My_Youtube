@@ -5,13 +5,12 @@ DB_load(function() {
 		$('.modal:first').remove();
 		$('#novids').show();
 	}
-	var selectedAccount; //used to keep track of the selected account
-	//cache doms
-	var vidContainer = $('#videos'),
-		accountInfo = document.getElementsByClassName('.user_data')[0],
-		sidebar = $('#sidebar'),
-		userData = $('#user_data'),
-		sidebarHTML = '';
+	var selectedAccount,				//used to keep track of the selected account
+		vidContainer = $('#videos'),	//div containing videos
+		sidebar = $('#sidebar'),		//div containing sidebar
+		userData = $('#user_data'),		//span containing some info about the Youtube account selected, such as username
+		sidebarHTML = '',				//
+		updateMsg = $('.modal span');	//div containing the "loading msg" screen
 
 	//loop through accounts and display image on sidebar
 	for (var i = 0; i < ExtensionData.accounts.length; i++) {
@@ -77,11 +76,12 @@ DB_load(function() {
 		If we have cached videos, we use that. We clean the cache when new videos are found in the background.
 	*/
 	if (ExtensionData.newVideosCache.length > 0) {
+		//loop through cache found
 		for (var i = 0; i < ExtensionData.newVideosCache.length; i++) {
 			var cache = ExtensionData.newVideosCache[i];
 			//the array might contain a "null" inside it, so filter that out
 			if (cache) {
-				newVideosHTML += generateNewVideosHTML(cache.videos, cache.accountIndex, cache.videoIndex, cache.index);
+				newVideosHTML += generateNewVideosHTML(cache.videos, cache.accountIndex, cache.videoIndex, cache.cacheIndex);
 			}
 		}
 		//when the user has watch all new videos we won't have any html to display
@@ -92,12 +92,16 @@ DB_load(function() {
 			error(3);
 		}
 	} else {
+		//loading msg
+		updateMsg.eq(0).text(chrome.i18n.getMessage('popupMsg1'));
+		//if we don't have any cache, we need to connect to Youtube
 		loadNewVideos(0);
 	}
-	//newVideosCount is used to keep track of how many new videos are found.
+	//currentAccount is used to keep track of how many accounts have new videos.
 	//we need this number to track and update our cache
-	var newVideosCount = 0;
+	var currentAccount = 0;
 	function loadNewVideos(i) {
+		updateMsg.eq(1).text(ExtensionData.accounts[i].name);
 		loadVideos(ExtensionData.accounts[i].id).done(function(feed) {
 			var videos = proccessYoutubeFeed(feed), save = false;
 			if (videos) {
@@ -112,17 +116,16 @@ DB_load(function() {
 						save = true;
 						videos[j].isNew = true;
 						videos[j].videoIndex = j;
-						videos[j].index = newVideosCount;
-						account.videos.push(videos[j]);
-						newVideosHTML += generateNewVideosHTML([videos[j]], i, j, newVideosCount);
-						newVideosCount++;
+						videos[j].cacheIndex = currentAccount;
+						newVideosHTML += generateNewVideosHTML([videos[j]], i, j, currentAccount);
 					} else {
 						videos[j].isNew = false;
-						account.videos.push(videos[j]);
 					}
+					account.videos.push(videos[j]);
 				}
 				if (save) {
-					newVideos.push(account)
+					currentAccount++;
+					newVideos.push(account);
 				}
 			}
 			//keep loding videos
@@ -131,6 +134,7 @@ DB_load(function() {
 			} else {
 				//finally show videos
 				if (newVideos.length) {
+					//cache new videos
 					ExtensionData.newVideosCache = newVideos;
 					DB_save(function() {
 						displayVideos(newVideosHTML);
@@ -218,7 +222,7 @@ DB_load(function() {
 			if (!videos[i].isNew) {
 				continue;
 			}
-			html += '<div class="vid" id="v' + videos[i].index + '" accountIndex="' + onlyNew + '" ' +
+			html += '<div class="vid" cacheIndex="' + videos[i].cacheIndex + '" accountIndex="' + onlyNew + '" ' +
 				'title="' + chrome.i18n.getMessage('popup_tooltip', [videos[i].author]) + '" >' +
 				'<a href="' + videos[i].url + '">' +
 				'<img src="' + videos[i].thumbnail + '" alt="' + videos[i].videoIndex + '" class="wrap thumb">' +
@@ -268,16 +272,18 @@ DB_load(function() {
 
 		self.off('click').click(function() {
 
-			var title = self.find('.t:first').text(),//current title
-				url = self.find('a:first').attr('href'),//current url
-				index = parseInt(self.find('img:first').attr('alt'), 10),
-				accountIndex = parseInt(self.attr('accountIndex'), 10);
+			var title = self.find('.t:first').text(),							//current video title
+				url = self.find('a:first').attr('href'),						//current video url
+				videoIndex = parseInt(self.find('img:first').attr('alt'), 10),	//the video position in the list of saved videos for the selected account
+				accountIndex = parseInt(self.attr('accountIndex'), 10);			//the account position in the list of accounts
+				cacheIndex = parseInt(self.attr('cacheIndex'), 10),				//the account position in the cache list of videos
+				currentVideos = ExtensionData.accounts[accountIndex].videoTitles,//our currently saved videos - might be outdated -
+				freshVideos = ExtensionData.newVideosCache[cacheIndex].videos;	//videos fresh from Youtube
 
-			var x = parseInt(self.attr('id').substring(1,2), 10);
-
-			var currentVideos = ExtensionData.accounts[accountIndex].videoTitles,
-				freshVideos = ExtensionData.newVideosCache[x].videos;
-			//update current list of saved videos to match the position of the new list of fresh videos
+			/*
+				Update current list of saved videos to match the position of the new list of fresh videos.
+				This makes sure that we don't mark already watched videos as "new".
+			*/
 			for (var i = 0; i < currentVideos.length; i++) {
 				for (var k = 0; k < freshVideos.length; k++) {
 					if (currentVideos[i] === freshVideos[k].title && i !== k) {
@@ -286,12 +292,12 @@ DB_load(function() {
 					}
 				}
 			}
-			//inser new title
-			currentVideos[index] = title;
-			//update
+			//inser new title into the list of saved videos
+			currentVideos[videoIndex] = title;
+			//update extension data with updated list of videos
 			ExtensionData.accounts[accountIndex].videoTitles = currentVideos;
 			//update cache
-			ExtensionData.newVideosCache[x].videos[index].isNew = false;
+			ExtensionData.newVideosCache[cacheIndex].videos[videoIndex].isNew = false;
 			
 			//update the icon number count
 			chrome.browserAction.getBadgeText({}, function(result) {
@@ -300,7 +306,7 @@ DB_load(function() {
 					text: update > 0 ? update.toString() : ''
 				});
 			});
-
+			//save changes
 			DB_save(function() {
 				openTab(url);
 			});
@@ -322,7 +328,10 @@ DB_load(function() {
 
 				var currentVideos = ExtensionData.accounts[selectedAccount].videoTitles,
 					freshVideos = document.getElementsByClassName('title');
-				//update current list of saved videos to match the position of the new list of fresh videos
+				/*
+					Update current list of saved videos to match the position of the new list of fresh videos.
+					This makes sure that we don't mark already watched videos as "new".
+				*/
 				for (var i = 0; i < currentVideos.length; i++) {
 					for (var k = 0; k < freshVideos.length; k++) {
 						if (currentVideos[i] === freshVideos[k].innerHTML && i !== k) {
@@ -331,13 +340,14 @@ DB_load(function() {
 						}
 					}
 				}
-				 
+				//inser new title into the list of saved videos
 				currentVideos[number] = title;
+				//update extension data with updated list of videos
 				ExtensionData.accounts[selectedAccount].videoTitles = currentVideos;
 
 				/*
-				Update cache
-				Sometimes this might fail because the cache is empty, so we use try catch 
+					Update cache
+					Sometimes this might fail because the cache is empty, so we use try catch 
 				*/
 				try {
 					for (var i = 0; i < ExtensionData.newVideosCache.length; i++) {
@@ -349,7 +359,9 @@ DB_load(function() {
 							}
 						}
 					}
-				} catch(e) {}
+				} catch(e) {
+					console.warn('Could not update cache. Error: ' + e.message);
+				}
 
 				//update the icon number count
 				chrome.browserAction.getBadgeText({}, function(result) {
@@ -424,9 +436,18 @@ DB_load(function() {
 	 * @param {String} url the url to open
 	 */
 	function openTab(url) {
-		chrome.tabs.create({
-			url: url
-		});
+		if (ExtensionData.prefs['open_in_current_tab']) {
+			chrome.tabs.query({'active': true}, function (tabs) {
+   	 			chrome.tabs.update(tabs[0].id, {
+   	 				url: url
+   	 			});
+   	 			window.close();
+			});
+		} else {
+			chrome.tabs.create({
+				url: url
+			});
+		}
 	}
 
 });

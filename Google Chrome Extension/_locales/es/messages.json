@@ -72,6 +72,9 @@
    "opts4b": {
       "message": "minuto(s)"
    },
+   "opts5": {
+      "message": "Abrir videos en la pestaña actual"
+   },
    "optsHeader1": {
       "message": "Youtuberos que sigues:"
    },
@@ -122,5 +125,32 @@
             "example": "PMVTutoriales"
          }
       }
+   },
+   "popupMsg1": {
+      "message": "Comprobando videos de: "
+   },
+   "thx1": {
+      "message": "¡Gracias por usar Mi YouTube™!"
+   },
+   "thx2": {
+      "message": "No olvides..."
+   },
+   "thx3": {
+      "message": "Calificar 5 estrellas"
+   },
+   "thx4": {
+      "message": "Suscribirte"
+   },
+   "thx5": {
+      "message": "Seguirnos en Facebook"
+   },
+   "thx0b": {
+      "message": "Por la galería de Apps"
+   },
+   "thx1b": {
+      "message": "A mi canal de Youtube"
+   },
+   "thx2b": {
+      "message": "Da clic a 'Me gusta' :)"
    }
 }

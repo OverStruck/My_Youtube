@@ -5,7 +5,12 @@ for (var i = 0; i < objects.length; i++) {
 		objects[i].innerHTML = chrome.i18n.getMessage(objects[i].dataset.message);
 	}
 }
-$('#x').attr('href', '_locales/' + chrome.i18n.getMessage('lang') + '/history.html')
+$('#x').attr('href', '_locales/' + chrome.i18n.getMessage('lang') + '/history.html');
+$('#thx a').each(function (i) {
+	console.log(i)
+	$(this).attr('title', chrome.i18n.getMessage('thx'+i+'b'));
+});
+//load user settings
 DB_load(function() {
 	//dom elements
 	var fieldAdd = $('#add-field'),
@@ -34,6 +39,9 @@ DB_load(function() {
 						break;
 					case 1:
 						ExtensionData.prefs['play_popup_sound'] = self.is(':checked');
+						break;
+					case 2:
+						ExtensionData.prefs['open_in_current_tab'] = self.is(':checked');
 						break;
 					default:
 						err('errMsg5');
@@ -89,6 +97,9 @@ DB_load(function() {
 					break;
 				case 1:
 					self.prop('checked', ExtensionData.prefs['play_popup_sound']);
+					break;
+				case 2:
+					self.prop('checked', ExtensionData.prefs['open_in_current_tab']);
 					break;
 				default:
 					err('errMsg5');

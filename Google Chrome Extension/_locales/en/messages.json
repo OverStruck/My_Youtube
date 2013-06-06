@@ -76,6 +76,9 @@
    "opts4b": {
       "message": "minute(s)"
    },
+   "opts5": {
+      "message": "Open videos in the current tab"
+   },
    "optsHeader1": {
       "message": "Youtubers you're following:"
    },
@@ -126,5 +129,32 @@
             "example": "PMVTutoriales"
          }
       }
+   },
+   "popupMsg1": {
+      "message": "Checking videos from: "
+   },
+   "thx1": {
+      "message": "Thanks for using My YouTube™!"
+   },
+   "thx2": {
+      "message": "Don't forget to..."
+   },
+   "thx3": {
+      "message": "Rate 5 starts"
+   },
+   "thx4": {
+      "message": "Subscribe"
+   },
+   "thx5": {
+      "message": "Like & Follow"
+   },
+   "thx0b": {
+      "message": "On the Apps Gallery"
+   },
+   "thx1b": {
+      "message": "To my Youtube Channel (it's in Spanish :/)"
+   },
+   "thx2b": {
+      "message": "Share this extension with your friends on Facebook :)"
    }
 }

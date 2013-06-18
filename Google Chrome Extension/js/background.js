@@ -24,7 +24,7 @@
 		title: chrome.i18n.getMessage('contextMenu'),
 		contexts: ["image"],
 		documentUrlPatterns: ["chrome-extension://*/nyz_popup.html"],
-		targetUrlPatterns: ["https://i.ytimg.com/*/mqdefault.jpg", "http://i.ytimg.com/*/mqdefault.jpg"]
+		targetUrlPatterns: ["https://*.ytimg.com/*/mqdefault.jpg", "http://*.ytimg.com/*/mqdefault.jpg"]
 	});
 
 	var totalNewVideos = 0,

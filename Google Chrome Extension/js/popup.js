@@ -334,11 +334,15 @@ DB_load(function() {
 				Update current list of saved videos to match the position of the new list of fresh videos.
 				This makes sure that we don't mark already watched videos as "new".
 			*/
+			
 			for (var i = 0; i < currentVideos.length; i++) {
+				console.log('CURR LOOP VID: ' + currentVideos[i]);
 				for (var k = 0; k < freshVideos.length; k++) {
+					console.log('CURR LOOP 2 VID: ' + freshVideos[k].title);
 					if (currentVideos[i] === freshVideos[k].title && i !== k) {
+						var temp = currentVideos[k];
 						currentVideos[k] = currentVideos[i];
-						currentVideos[i] = '';
+						currentVideos[i] = temp;
 					}
 				}
 			}
@@ -390,8 +394,9 @@ DB_load(function() {
 				for (var i = 0; i < currentVideos.length; i++) {
 					for (var k = 0; k < freshVideos.length; k++) {
 						if (currentVideos[i] === freshVideos[k].innerHTML && i !== k) {
+							var temp = currentVideos[k];
 							currentVideos[k] = currentVideos[i];
-							currentVideos[i] = '';
+							currentVideos[i] = temp;
 						}
 					}
 				}
@@ -458,6 +463,7 @@ DB_load(function() {
 		account = (account === undefined ? selectedAccount : account);
 		var tit = ExtensionData.accounts[account].videoTitles,
 			newTxt = chrome.i18n.getMessage('newTxt');
+		console.log(tit)
 		for (var i = 0; i < tit.length; i++) {
 			if (tit[i] === title) {
 				return bool ? false : '<span class="title">' + title + '</span>';

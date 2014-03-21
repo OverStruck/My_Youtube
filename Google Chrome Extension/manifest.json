@@ -1,20 +1,19 @@
 {
 	"manifest_version": 2,
-
+	"author": "Juanix",
 	"name": "__MSG_extName__",
+	"short_name": "__MSG_extName__",
 	"description": "__MSG_extDescription__",
-	"version": "1.2.5",
+	"version": "1.2.7",
 	"minimum_chrome_version": "26.0",
 	"background": {
 		"page": "background.html"
 	},
 	"options_page": "options.html",
 	"icons": {
-		"128": "images\\icons\\icon128.png",
-		"48": "images\\icons\\icon48.png",
-		"38": "images\\icons\\icon38.png",
-		"19": "images\\icons\\icon19.png",
-		"16": "images\\icons\\icon16.png"
+		"128": "images//icon128.png",
+		"48": "images//icon48.png",
+		"16": "images//icon16.png"
 	},
 	"permissions": [
         "tabs",
@@ -27,8 +26,8 @@
       ],
 	"browser_action": {
 		"default_icon": {
-			"19": "images\\icons\\icon19.png",
-			"38": "images\\icons\\icon38.png"
+			"19": "images//icon19.png",
+			"38": "images//icon38.png"
 		},
 	"default_title": "__MSG_extPopupTooltip__",
 	"default_popup": "nyz_popup.html"

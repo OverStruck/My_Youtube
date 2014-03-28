@@ -55,7 +55,6 @@ DATA.load(function (ExtensionData) {
   var mainBtn = ActionButton({
     id: "mainBtn",
     label: "My Youtube",
-    icon: "./icons/badges/3.png",
     icon: {
       "16": "./icons/icon16.png", //paths relative to the data folder
       "38": "./icons/icon38.png",
@@ -258,8 +257,8 @@ DATA.load(function (ExtensionData) {
     });
 
     //update badge
-    mainWindow.port.on("updateBadge", function() {
-      if (mainBtn.icon.index("badges") !== -1) {
+    mainWindow.port.once("updateBadge", function() {
+      if (mainBtn.icon.indexOf("badges") !== -1) {
         let newIcon = mainBtn.icon.replace( /^\D+/g, '');
         newIcon = parseInt(newIcon) - 1;
         if (newIcon > 0)

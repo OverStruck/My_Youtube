@@ -357,7 +357,8 @@ function main(data, translation) {
 			data.cache[cacheIndex].videos[videoIndex].isNew = false;
 
 			//update the icon number count
-			self.port.emit("updateBadge");
+			//we need to use window.self because be have a local "self" variable
+			window.self.port.emit("updateBadge");
 			//save changes
 			DB_save(function() {
 				if (!markingVideoAsWatched) {
@@ -423,7 +424,7 @@ function main(data, translation) {
 				}
 
 				//update the icon number count
-				self.port.emit("updateBadge");
+				window.self.port.emit("updateBadge");
 
 				//save extensions data array
 				DB_save(function() {

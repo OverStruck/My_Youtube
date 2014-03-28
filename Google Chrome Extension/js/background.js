@@ -1,4 +1,11 @@
-﻿DB_load(function() {
+﻿/* 
+  My Youtube (Google Chrome) background.js file 
+  Last update 3/24/2014
+
+  This is the brain file of the extension
+  it is akin to main.js in firefox extensions
+*/
+DB_load(function() {
 	//first install
 	if (ExtensionData.isNewInstall) {
 		getYoutuber('ZgwLCu6tSLEUJ30METhJHg').done(function(response) {

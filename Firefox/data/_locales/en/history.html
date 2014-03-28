@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+    <head>
+        <title data-message="optionsHeaderTitle">Mi Youtube</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" type="text/css" href="../../css/options.css">
+        <style type="text/css">
+            .desc {font-style: italic;color: rgb(165, 165, 165);padding: 5px;margin-left: 25px;font-size: 14px;}
+            h1,h2,h3 {margin: 5px 0; font-weight: lighter}
+            ul {margin-top: 1px;}
+            li {margin-top: 3px; margin-bottom: 3px;}
+        </style>
+    </head>
+    <body>
+        <div id="options">
+            <div id="logo"></div>
+            <div class="hbox">
+                <h2 data-message="optsFooter"></h2>
+				<h3>Version 1.2.7</h3>
+				<ul>
+                    <li>
+                    Updated extension to work con Google Chrome version 31. <br>
+                </ul>
+				<h3>Version 1.2.5</h3>
+                 <ul>
+                    <li>
+                    Fixed bug #1. <br>
+                    <span class="desc">This bug caused the extension to not properly update the videos list when you clicked a new video. This made the extension mark an already watched video as new.</span>
+                </ul>
+				<h3>Version 1.2.3</h3>
+                 <ul>
+                    <li>
+                    Added the option to mark videos as watched. <br>
+                    <span class="desc">Just right-click on the video you want, and click where it says "Mark videos as watched"</span>
+                </ul>
+                <img src="../../images/0.png" alt="Context Menu" >
+				<h3>Version 1.2</h3>
+                <ul>
+                    <li>
+                    Added a cache system for new uploaded videos. <br>
+                    <span class="desc">This basically means that once new videos are found and loaded, they won't be fetched
+                        from Youtube every time you click the extension icon. This speeds up the process of watching several
+                        new videos. The cache is cleaned once new videos are found in the background.</span>
+                    </li>
+                    <li>Added this "History" page for those interested in what is new/changed.</li>
+                    <li>Added a "Clean Cache" button to the options page. This should be self explanatory.</li>
+                    <li>Updated options page with social media links and relevant information.</li>
+                </ul>
+                <h3>Version 1.1</h3>
+                <ul>
+                    <li>
+                    Now by default only new videos are shown when clicking the extension icon. <br>
+                    <span class="desc">That way you don't have to go through each account to see new uploaded videos.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="footer">Copyright &copy; <b>Juanix.net</b> 2013 |
+        <a href="../../options.html"><span>Options</span></a></div>
+        <script src="js/jquery2.js" type="text/javascript"></script>
+        <script src="js/Mi_Youtube_Data.js" type="text/javascript"></script>
+        <script src="js/options.js" type="text/javascript"></script>
+    </body>
+</html>

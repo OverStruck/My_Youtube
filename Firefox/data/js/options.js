@@ -9,6 +9,10 @@ for (var i = 0; i < objects.length; i++) {
 for (var i = 1; i <= 8; i++)
 	strings.push("errMsg" + i);
 
+$('#thx a').each(function (i) {
+	strings.push('thx'+i+'b');
+});
+
 strings.push("lang");
 
 //translate
@@ -20,6 +24,10 @@ self.port.once("translation", function(response) {
 			objects[i].innerHTML = translation[objects[i].dataset.message];
 		}
 	}
+
+	$('#thx a').each(function (i) {
+		$(this).attr('title', translation['thx'+i+'b']);
+	});
 
 	$('#x').attr('href', '_locales/' + translation['lang'] + '/history.html');
 	$("#logo").css("background-image", "url('images/" + translation['lang'] + "_logo.png')")
@@ -38,7 +46,7 @@ function main(ExtensionData, translation) {
 	//click event listener
 	btnAdd.click(addYoutuber);
 	btnClean.click(function() {
-		ExtensionData.newVideosCache = []
+		ExtensionData.cache = []
 		DB_save(function() {
 			err('errMsg8');
 		});

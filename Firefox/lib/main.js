@@ -149,7 +149,7 @@ DATA.load(function (ExtensionData) {
             
             //show popup letting user know of new videos
             if (oldVideosHash !== newVideosHash) {
-              ExtensionData.newVideosCache = []; //clean cache
+              ExtensionData.cache = []; //clean cache
               oldVideosHash = newVideosHash;
               if (ExtensionData.prefs['show_popup']) {
                 notify(totalNewVideos);

@@ -243,10 +243,18 @@ DATA.load(function (ExtensionData) {
       mainWindow.hide();
       if (prefs.inNewTab)
         tabs.open(prefs.url);
-      else {
-        tabs.activeTab.attach({
-          contentScript: 'window.location.href = "' + prefs.url + '";'
-        });
+      else 
+      {
+        //sometimes we are not in a normal tab (with an regular web page loaded)
+        //so we can't redirect that tab to the video, hence we just open a new tab
+        try {
+          tabs.activeTab.attach({
+            contentScript: 'window.location.href = "' + prefs.url + '";'
+          });
+        }
+        catch (e) {
+          tabs.open(prefs.url);
+        }
       }
     });
 

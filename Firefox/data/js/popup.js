@@ -359,7 +359,7 @@ function main(data, translation) {
 				if (!markingVideoAsWatched) {
 					openTab(url);
 				} else {
-					self.fadeOut('fast');
+					self.parent().fadeOut('fast');
 				}
 			});
 		});
@@ -426,7 +426,7 @@ function main(data, translation) {
 					if (!markingVideoAsWatched) {
 						openTab(url);
 					} else {
-						self.paretn().fadeOut('fast');
+						self.parent().fadeOut('fast');
 					}
 				});
 			});

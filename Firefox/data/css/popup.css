@@ -66,6 +66,20 @@ body {
 	font-weight:700;
 	color:rgb(45, 63, 95);
 }
+.details {
+    display:block;
+    color: #696868;
+    font-size:12px;
+    position: absolute;
+    bottom: 0;
+    left: 210px;
+    
+}
+button.details {
+    left:0;
+    border-style:none;
+    cursor:pointer;
+}
 .wrap {
     float: left; 
     clear: left; 
@@ -79,8 +93,16 @@ body {
 .thumb {
 	width: 200px;
 }
+.container {
+clear:both;
+position:relative;
+height:113px;
+}
 .vid {
-	clear: both;
+        height: 113px;
+}
+.vid:hover {
+    background-color: rgb(226, 242, 255);
 }
 .modal {
     position:   absolute;

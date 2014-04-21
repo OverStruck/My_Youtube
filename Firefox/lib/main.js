@@ -241,7 +241,9 @@ DATA.load(function (ExtensionData) {
     //open new tab when requested
     mainWindow.port.on("open_tab", function (prefs) {
       mainWindow.hide();
-      if (prefs.inNewTab)
+      if (prefs.url === "options")
+        openOptions();
+      else if (prefs.inNewTab)
         tabs.open(prefs.url);
       else 
       {
@@ -265,7 +267,7 @@ DATA.load(function (ExtensionData) {
     });
 
     //update badge
-    mainWindow.port.once("updateBadge", function() {
+    mainWindow.port.on("updateBadge", function() {
       if (mainBtn.icon.indexOf("badges") !== -1) {
         let newIcon = mainBtn.icon.replace( /^\D+/g, '');
         newIcon = parseInt(newIcon) - 1;
@@ -274,6 +276,10 @@ DATA.load(function (ExtensionData) {
         else
           mainBtn.icon = "./icons/icon38.png";
       }
+    });
+  
+    mainWindow.port.on("log", function(msg) {
+      console.log(msg);
     });
   }
 

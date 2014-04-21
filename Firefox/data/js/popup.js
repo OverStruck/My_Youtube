@@ -10,14 +10,15 @@ function main(data, translation) {
 		$('#novids').show();
 	}
 
-	//add listener to context menu
-	//chrome.contextMenus.onClicked.addListener(markVideoAsWatched);
+	//click listener for options button
+	$('#options').click(function() {
+		openTab("options");
+	});
 
 	var selectedAccount; 				//to keep track of the selected account
 	var vidContainer = $('#videos'); 	//div containing videos
 	var userData 	 = $('#user_data'); //span containing some info about the Youtube account selected, such as username
 	var updateMsg 	 = $('.modal span'); //div containing the "loading msg" screen
-	var clickedEl; //variable use to track the element click in case the user wants to mark a video as watched
 
 	generateSidebar();
 	initialize(); //start
@@ -161,7 +162,6 @@ function main(data, translation) {
 						var html = generateSideBarVideosHTML(videos);
 						//display account name
 						userData.text(accountName);
-						//console.log("CLICK CLICK CLICK");
 						displayVideos(html);
 					} else {
 						//error msg: no videos found for selected acount
@@ -230,25 +230,8 @@ function main(data, translation) {
 		vidContainer.fadeOut('fast', function() {
 			vidContainer.html(videos).promise().done(function() {
 				activateVideos();
-				activateRightClick();
 				vidContainer.fadeIn('fast');
 			});
-		});
-	}
-
-	/**
-	 * Adds event listener to images to be use when marking a video as watched
-	 */
-	function activateRightClick() {
-		//add listener
-		$('.vid img').each(function(i) {
-			$(this).off('mousedown').on('mousedown', function(e) {
-				//right click
-				if (e.which === 3) {
-					clickedEl = e.target;
-					console.log("RIGHT CLICK DETECTED: " + clickedEl);
-				}
-			})
 		});
 	}
 
@@ -256,9 +239,10 @@ function main(data, translation) {
 	 * Main function when marking videos as watched
 	 * Basically it just triggers the click event which updates everything
 	 * We pass an extra parameter to prevent going to the video url
+	 * @param el the element clicked
 	 */
-	function markVideoAsWatched() {
-		var elem = $(clickedEl).parent().parent();
+	function markVideoAsWatched(el) {
+		var elem = $(el).siblings('div');
 		elem.trigger('click', {
 			markingVideoAsWatched: true
 		});
@@ -277,12 +261,16 @@ function main(data, translation) {
 			if (!videos[i].isNew) {
 				continue;
 			}
-			html += '<div class="vid" data-videourl="' + videos[i].url + '" data-videoindex="' + videos[i].videoIndex + '" data-cacheindex="' + videos[i].cacheIndex + '" data-accountindex="' + onlyNew + '" ' +
+			html += '<div class="container">' +
+				'<div class="vid" data-videourl="' + videos[i].url + '" data-videoindex="' + videos[i].videoIndex + '" data-cacheindex="' + videos[i].cacheIndex + '" data-accountindex="' + onlyNew + '" ' +
 				'title="' + translation['popup_tooltip'] +" "+ [videos[i].author] + '" >' +
 				'<a href="#">' +
 				'<img src="' + videos[i].thumbnail + '" alt="' + videos[i].title + '" class="wrap thumb">' +
 				'<span class="t">' + videos[i].title + '</span>' +
-				'<span class="description">' + videos[i].description.substring(0, 120) + '</span></a></div>';
+				'<span class="description">' + videos[i].description.substring(0, 120) + '</span>' +
+				'</a></div>'+
+				'<span class="details">Subido por: <i>'+videos[i].author+'</i></span>' +
+				'<button class="details">Marcar como visto</button></div>';
 		}
 		return html;
 	}
@@ -295,11 +283,13 @@ function main(data, translation) {
 	function generateSideBarVideosHTML(videos) {
 		var html = '';
 		for (var i = 0; i < videos.length; i++) {
-			html += '<div class="vid" data-videourl="' + videos[i].url + '" data-videoid="' + videos[i].id + '" >' +
+			html += '<div class="container">' +
+				'<div class="vid" data-videourl="' + videos[i].url + '" data-videoid="' + videos[i].id + '" >' +
 				'<a href="#">' +
 				'<img src="' + videos[i].thumbnail + '" alt="' + videos[i].title + '" class="wrap thumb">' +
 				'<span class="t">' + isNewVideo(videos[i].title) + '</span>' +
-				'<span class="description">' + videos[i].description.substring(0, 120) + '</span></a></div>';
+				'<span class="description">' + videos[i].description.substring(0, 120) + '</span>' +
+				'</a></div></div>';
 		}
 		return html;
 	}
@@ -315,6 +305,11 @@ function main(data, translation) {
 			} else {
 				activateNewVideos(this);
 			}
+		});
+		$('button').each(function() {
+			$(this).off('click').click(function(e) {
+				markVideoAsWatched(e.target);
+			});
 		});
 	}
 
@@ -431,7 +426,7 @@ function main(data, translation) {
 					if (!markingVideoAsWatched) {
 						openTab(url);
 					} else {
-						self.fadeOut('fast');
+						self.paretn().fadeOut('fast');
 					}
 				});
 			});
@@ -517,5 +512,9 @@ function main(data, translation) {
 		self.port.once("DB_saved", function() {
 			callback();
 		});
+	}
+
+	function log(msg) {
+		self.port.emit("log", msg);
 	}
 }

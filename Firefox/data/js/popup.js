@@ -306,11 +306,6 @@ function main(data, translation) {
 				activateNewVideos(this);
 			}
 		});
-		$('button').each(function() {
-			$(this).off('click').click(function(e) {
-				markVideoAsWatched(e.target);
-			});
-		});
 	}
 
 	/**
@@ -361,6 +356,13 @@ function main(data, translation) {
 				} else {
 					self.parent().fadeOut('fast');
 				}
+			});
+		});
+	
+		//mark as watched
+		$('button.details').each(function() {
+			$(this).off('click').click(function(e) {
+				markVideoAsWatched(e.target);
 			});
 		});
 	}

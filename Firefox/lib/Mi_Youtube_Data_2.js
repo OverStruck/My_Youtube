@@ -17,7 +17,7 @@ function MY_YOUTUBE_DATA(location)
         thumbnail: "https://i3.ytimg.com/i/ZgwLCu6tSLEUJ30METhJHg/1.jpg?v=516a0349", 
         videoTitles: [], 
         newVideos: false,
-        url: "https://www.youtube.com/channel/UCZgwLCu6tSLEUJ30METhJHg"
+        url: "https://www.youtube.com/user/PMVTutoriales"
     	}
 		],
 		prefs: {

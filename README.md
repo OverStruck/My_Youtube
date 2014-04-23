@@ -5,8 +5,8 @@ Youtubers have uploaded new videos.
 ![Screenshot](http://i.imgur.com/AomsYlR.png)
 
 ##Download
-[Google Chrome:](https://chrome.google.com/webstore/detail/my-youtube/cphiahocnjphccbcpaabkhbppnilapeg)<br>
-[Firefox:](https://github.com/OverStruck/My_Youtube/releases/)<br>
+[Google Chrome](https://chrome.google.com/webstore/detail/my-youtube/cphiahocnjphccbcpaabkhbppnilapeg)<br>
+[Firefox](https://github.com/OverStruck/My_Youtube/releases/)<br>
  
 ##Important source files
 **background.js/main.js** - Main js script that checks for new videos in the background<br>
@@ -24,8 +24,8 @@ Mi Youtube ™ es ​​una extensión orientada a ávidos Youtubers. Actúa com
 ![Screenshot](http://i.imgur.com/AomsYlR.png)
 
 ##Descargar
-[Google Chrome:](https://chrome.google.com/webstore/detail/my-youtube/cphiahocnjphccbcpaabkhbppnilapeg)<br>
-[Firefox:](https://github.com/OverStruck/My_Youtube/releases/)<br>
+[Google Chrome](https://chrome.google.com/webstore/detail/my-youtube/cphiahocnjphccbcpaabkhbppnilapeg)<br>
+[Firefox](https://github.com/OverStruck/My_Youtube/releases/)<br>
  
 ##Important source files
 **background.js/main.js** - Principal script que comprueba si hay nuevos vídeos en el fondo<br>

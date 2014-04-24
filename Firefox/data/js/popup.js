@@ -230,8 +230,27 @@ function main(data, translation) {
 		vidContainer.fadeOut('fast', function() {
 			vidContainer.html(videos).promise().done(function() {
 				activateVideos();
+				activateRightClick();
 				vidContainer.fadeIn('fast');
 			});
+		});
+	}
+
+	/**
+	* right "click" event listener
+	*/
+	function activateRightClick() {
+		//add listener
+		$('.vid').each(function(i) {
+			$(this).off('mousedown').on('mousedown', function(e) {
+				//right click
+				if (e.which === 3) {
+					triggerClick(e.target, {
+						markingVideoAsWatched: false,
+						rightClick: true
+					});
+				}
+			})
 		});
 	}
 
@@ -241,11 +260,9 @@ function main(data, translation) {
 	 * We pass an extra parameter to prevent going to the video url
 	 * @param el the element clicked
 	 */
-	function markVideoAsWatched(el) {
-		var elem = $(el).siblings('div');
-		elem.trigger('click', {
-			markingVideoAsWatched: true
-		});
+	function triggerClick(el, params) {
+		var elem = $(el);
+		elem.trigger('click', params);
 	}
 
 	/**
@@ -316,8 +333,9 @@ function main(data, translation) {
 	function activateNewVideos(_this) {
 		var self = $(_this);
 
-		self.off('click').click(function(event, markingVideoAsWatched) {
-
+		self.off('click').click({markingVideoAsWatched: false, rightClick: false}, function(event, params) {
+			params = params || event.data; //defaults
+			
 			var title = self.find('.t:first').text(); //current video title
 			var url = self.data("videourl"); //current video url
 			var videoIndex = self.data('videoindex'); //the video position in the list of saved videos for the selected account
@@ -351,8 +369,8 @@ function main(data, translation) {
 			window.self.port.emit("updateBadge");
 			//save changes
 			DB_save(function() {
-				if (!markingVideoAsWatched) {
-					openTab(url);
+				if (!params.markingVideoAsWatched) {
+					openTab(url, params.rightClick);
 				} else {
 					self.parent().fadeOut('fast');
 				}
@@ -362,7 +380,10 @@ function main(data, translation) {
 		//mark as watched
 		$('button.details').each(function() {
 			$(this).off('click').click(function(e) {
-				markVideoAsWatched(e.target);
+				triggerClick(e.target, {
+					markingVideoAsWatched: true,
+					rightClick: false
+				});
 			});
 		});
 	}
@@ -380,10 +401,11 @@ function main(data, translation) {
 
 		//we are dealing with new unwatched video
 		if (self.find('.newVid').length > 0) {
-			self.off('click').click(function(event, markingVideoAsWatched) {
+			self.off('click').click({markingVideoAsWatched: false, rightClick: false}, function(event, params) {
+				params = params || event.data; //defaults
 
-				var currentVideos = data.channels[selectedAccount].videoTitles,
-					freshVideos = document.getElementsByClassName('title');
+				var currentVideos = data.channels[selectedAccount].videoTitles;
+				var freshVideos = document.getElementsByClassName('title');
 				/*
 					Update current list of saved videos to match the position of the new list of fresh videos.
 					This makes sure that we don't mark already watched videos as "new".
@@ -425,8 +447,8 @@ function main(data, translation) {
 
 				//save extensions data array
 				DB_save(function() {
-					if (!markingVideoAsWatched) {
-						openTab(url);
+					if (!params.markingVideoAsWatched) {
+						openTab(url, params.rightClick);
 					} else {
 						self.parent().fadeOut('fast');
 					}
@@ -434,9 +456,11 @@ function main(data, translation) {
 			});
 
 		} else {
-			self.off('click').click(function(event, markingVideoAsWatched) {
-				if (!markingVideoAsWatched) {
-					openTab(url);
+			self.off('click').click({markingVideoAsWatched: false, rightClick: false}, function(event, params) {
+				params = params || event.data; //defaults
+
+				if (!params.markingVideoAsWatched) {
+					openTab(url, params.rightClick);
 				} else {
 					window.alert(translation['contextMenuMsg']);
 				}
@@ -495,10 +519,14 @@ function main(data, translation) {
 	 * opens a new tab
 	 * @param {String} url the url to open
 	 */
-	function openTab(url) {
+	function openTab(url, rightClick) {
+		//if the user is opening the video using by rightclicking, we want to do the opposite of
+		//whatever setting they have for " Open videos in the current tab"
+
+		var openInNewTab = (rightClick ? data.prefs['open_in_current_tab'] : !data.prefs['open_in_current_tab']);
 		self.port.emit("open_tab", {
 			"url": url,
-			"inNewTab": !data.prefs['open_in_current_tab']
+			"inNewTab": openInNewTab
 		});
 	}
 
@@ -514,9 +542,5 @@ function main(data, translation) {
 		self.port.once("DB_saved", function() {
 			callback();
 		});
-	}
-
-	function log(msg) {
-		self.port.emit("log", msg);
 	}
 }

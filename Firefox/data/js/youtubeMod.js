@@ -42,12 +42,30 @@ self.port.once("channels", function(channels) {
 	container.insertBefore(addBtn, susBtn);
 
 	function addYoutuber() {
+		if(document.getElementById('myY-modal')) {
+			document.getElementById('myY-modal').setAttribute('style', '');
+		}
+		else {
+			var modal = document.createElement('div');
+				modal.setAttribute('class', 'modal');
+				modal.setAttribute('id', 'myY-modal');
+				modal.innerHTML = '<div style="font-weight: bolder">Agregando Youtuber...</div>';
+			document.body.appendChild(modal);
+		}
+
 		self.port.emit('addYoutuber', userName);
 	}
 
-	self.port.once('done', function() {
-		addBtn.setAttribute('disabled', 'disabled');
-		addBtn.removeEventListener('click', addYoutuber, false);
-		addBtn.innerHTML = 'Youtuber agregado';
+	self.port.on('done', function(status) {
+		if (status.isError === false) {
+			addBtn.setAttribute('disabled', 'disabled');
+			addBtn.removeEventListener('click', addYoutuber, false);
+			addBtn.innerHTML = 'Youtuber agregado';
+		} else {
+			alert("No se puede agregar a este Youtuber en estos momentos\n\nIntentalo despues");
+		}
+
+		//remove/hide
+		document.getElementById('myY-modal').setAttribute('style', 'display:none');
 	});
 });

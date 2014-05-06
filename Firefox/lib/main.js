@@ -1,6 +1,5 @@
 /* 
   My Youtube (FF) Main.js file 
-  Last update 4/21/2014
 
   This is the brain file of the extension
   it is akin to background.js in chrome extensions
@@ -9,6 +8,10 @@ const SS = require("sdk/simple-storage"); //simple storage
 const DATABASE = require("./Mi_Youtube_Data_2"); //import data module
 //create data object (constains all extension data)
 const DATA = new DATABASE.MY_YOUTUBE_DATA(SS.storage);
+//todo - inform user he's using too much info
+//SS.on("OverQuota", function() {
+    //window.alert('Storage limit exceeded');
+//});
 
 DATA.load(function (ExtensionData) {
     //---------required modules & setup -------------------------------
@@ -16,16 +19,18 @@ DATA.load(function (ExtensionData) {
     const {Panel} = require("sdk/panel"); //panel (for main popup)
     const Request = require("sdk/request").Request; //network requests
     const tabs = require("sdk/tabs");
-    const self = require("sdk/self"); //self 
-    const ss = require("sdk/simple-storage");
     const translate = require("sdk/l10n").get;
     const notifications = require("sdk/notifications");
     const tmr = require("sdk/timers");
     const pageMod = require("sdk/page-mod"); //needed to add contentscripts
+    const self = require("sdk/self");
 
-    //--------first install--------------------------------------------
+    const optionsURL = "http://www.juanix.net/apps/my-youtube/";
+
+    //first install
     if (ExtensionData.isNewInstall) {
         getYoutuber("ZgwLCu6tSLEUJ30METhJHg", function (response) {
+            response = response.json;
             ExtensionData.channels[0].videoTitles = getVideoTitles(response.feed);
             ExtensionData.isNewInstall = false;
             DATA.save(ExtensionData);
@@ -49,7 +54,6 @@ DATA.load(function (ExtensionData) {
         translations[name] = translate(name);
         translations[name2] = translate(name2);
     };
-
     //----------create extension main button & popup setup--------------------------------
     var mainWindow; //main popup window
     //creates the main extension button
@@ -80,6 +84,7 @@ DATA.load(function (ExtensionData) {
         ],
         contentScriptWhen: 'ready',
         contentScriptFile: self.data.url("js/youtubeMod.js"),
+        contentStyleFile: self.data.url("css/youtubeMod.css"),
         attachTo: 'top',
         onAttach: function onAttach(worker) {
         	//console.log('A---->:    ' + JSON.stringify(ExtensionData.channels, null, 4))
@@ -91,20 +96,38 @@ DATA.load(function (ExtensionData) {
                 one to get the channel thumbnail
                 and the second one to get the videos because youtube*/
                 getYoutuber(userName, function(res) {
-                    
-                    getYoutuber(userName, function (response) {
-                        var youtuber = response.feed;
-                        ExtensionData.channels.push({
-                            'id': res.entry.author[0].yt$userId.$t,
-                            'name': youtuber.author[0].name.$t,
-                            'thumbnail': res.entry.media$thumbnail.url,
-                            'videoTitles': getVideoTitles(youtuber),
-                            'newVideos': false,
-                            'url': res.entry.link[0].href
-                        });
-                        DATA.save(ExtensionData);
-                        worker.port.emit("done");
-                    }, true);
+                    if (res.statusText === "OK") {
+                        res = res.json;
+                        getYoutuber(userName, function (response) {
+                            if (response.statusText === "OK") {
+                                response = response.json;
+                                var youtuber = response.feed;
+                                ExtensionData.channels.push({
+                                    'id': res.entry.author[0].yt$userId.$t,
+                                    'name': youtuber.author[0].name.$t,
+                                    'thumbnail': res.entry.media$thumbnail.url,
+                                    'videoTitles': getVideoTitles(youtuber),
+                                    'newVideos': false,
+                                    'url': res.entry.link[0].href
+                                });
+                                DATA.save(ExtensionData);
+                                worker.port.emit("done", {
+                                    isError: false,
+                                    error: ''
+                                });
+                            } else {
+                                worker.port.emit("done", {
+                                    isError: true,
+                                    error: response.status
+                                });
+                            }
+                        }, true);
+                    } else {
+                         worker.port.emit("done", {
+                            isError: true,
+                            error: res.status
+                         });
+                    }
 
                 }, false);
 
@@ -114,9 +137,12 @@ DATA.load(function (ExtensionData) {
 
     //----------options page------------------------------------------
     pageMod.PageMod({
-        include: self.data.url("options.html"),
+        include: [
+            optionsURL + '*'
+        ],
         contentScriptFile: [
             self.data.url("js/jquery2.js"),
+            //self.data.url("js/FileSaver.js"),
             self.data.url("js/options.js")
         ],
         //port event listeners
@@ -131,7 +157,9 @@ DATA.load(function (ExtensionData) {
                 //send translation
                 worker.port.emit("translation", {
                     data: ExtensionData,
-                    translation: translation
+                    translation: translation,
+                    usage: SS.quotaUsage,
+                    optionsURL: optionsURL
                 });
             });
 
@@ -170,6 +198,7 @@ DATA.load(function (ExtensionData) {
         //we need to get the lastest data
         var account = ExtensionData.channels[count];
         getYoutuber(account.id, function (response) {
+            response = response.json;
             var newVideos = compareVideos(getVideoTitles(response.feed), account.videoTitles);
             //if newVideos > 0, add the number to the total newVideos number
             if (newVideos) {
@@ -182,7 +211,7 @@ DATA.load(function (ExtensionData) {
             //stop recursive function if count > the number of total channels saved
             if (count < ExtensionData.channels.length - 1) {
                 count++;
-                DATA.save(ExtensionData);
+                //DATA.save(ExtensionData);
                 checkNewVideos(count);
             } else {
                 //if totalNewVideos > 0, update icon badge number
@@ -193,9 +222,9 @@ DATA.load(function (ExtensionData) {
                     if (oldVideosHash !== newVideosHash) {
                         ExtensionData.cache = []; //clean cache
                         oldVideosHash = newVideosHash;
-                        if (ExtensionData.prefs['show_popup']) {
+                        if (ExtensionData.prefs['show_popup'])
                             notify(totalNewVideos);
-                        }
+                        
                         if (ExtensionData.prefs['play_popup_sound'])
                             alarm.port.emit('playAlarm');
                     }
@@ -231,10 +260,7 @@ DATA.load(function (ExtensionData) {
             },
             content: params,
             onComplete: function (response) {
-                if (response.statusText === "OK")
-                    callback(response.json);
-                else
-                    console.log("getYoutuber Error: " + response.statusText);
+                callback(response);
             },
         }).get();
     }
@@ -350,7 +376,7 @@ DATA.load(function (ExtensionData) {
 
     function openOptions() {
         //open new tab
-        tabs.open(self.data.url("options.html"));
+        tabs.open(self.data.url(optionsURL));
     }
 
     function notify(num) {

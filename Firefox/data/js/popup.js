@@ -115,7 +115,13 @@ function main(data, translation) {
 						error(3); //no new videos
 					}
 				}
-			});
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+				//the only error we care about is a 404
+				if (jqXHR.status !== 404)
+					loadNewVideos(++i);
+				else
+					window.alert("Error de conexión\n\nNo se pueden cargar videos en este momento")
+			})
 		};
 	}
 
@@ -262,6 +268,9 @@ function main(data, translation) {
 	 */
 	function triggerClick(el, params) {
 		var elem = $(el);
+		if (params.markingVideoAsWatched)//quick fix
+			elem = elem.siblings('div');
+
 		elem.trigger('click', params);
 	}
 
@@ -335,7 +344,7 @@ function main(data, translation) {
 
 		self.off('click').click({markingVideoAsWatched: false, rightClick: false}, function(event, params) {
 			params = params || event.data; //defaults
-			
+
 			var title = self.find('.t:first').text(); //current video title
 			var url = self.data("videourl"); //current video url
 			var videoIndex = self.data('videoindex'); //the video position in the list of saved videos for the selected account

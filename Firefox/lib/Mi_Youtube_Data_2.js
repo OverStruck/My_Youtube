@@ -44,7 +44,6 @@ MY_YOUTUBE_DATA.prototype.load = function(callback) {
 	else {
 		this.data = this.storage[this.name];
 	}
-
 	callback(this.data);
 };
 

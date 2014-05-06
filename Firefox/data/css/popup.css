@@ -5,6 +5,7 @@ html {
 body {
 	color: white;
 	font-family:arial;
+	background-color: white;
 }
 #videos {
 	float: left; 

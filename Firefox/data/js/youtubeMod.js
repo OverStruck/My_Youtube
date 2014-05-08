@@ -30,10 +30,10 @@ self.port.once("channels", function(channels) {
 		addBtn.setAttribute('style', 'background-image: linear-gradient(to top, rgba(199, 26, 166, 1) 0px, rgba(230, 34, 200, 1) 100%); margin-right: 12px;');
 		
 		if (isNewYoutuber) {
-			addBtn.innerHTML = 'Agregar a Mi Youtube';
+			addBtn.innerHTML = self.options.btnAddTxt;
 			addBtn.addEventListener('click', addYoutuber);
 		} else {
-			addBtn.innerHTML = 'Youtuber agregado';
+			addBtn.innerHTML = self.options.btnAddedTxt;
 			addBtn.setAttribute('disabled', 'disabled');
 		}
 
@@ -49,7 +49,7 @@ self.port.once("channels", function(channels) {
 			var modal = document.createElement('div');
 				modal.setAttribute('class', 'modal');
 				modal.setAttribute('id', 'myY-modal');
-				modal.innerHTML = '<div style="font-weight: bolder">Agregando Youtuber...</div>';
+				modal.innerHTML = '<div style="font-weight: bolder">'+self.options.btnAddingTxt+'...</div>';
 			document.body.appendChild(modal);
 		}
 
@@ -60,9 +60,9 @@ self.port.once("channels", function(channels) {
 		if (status.isError === false) {
 			addBtn.setAttribute('disabled', 'disabled');
 			addBtn.removeEventListener('click', addYoutuber, false);
-			addBtn.innerHTML = 'Youtuber agregado';
+			addBtn.innerHTML = self.options.btnAddedTxt;
 		} else {
-			alert("No se puede agregar a este Youtuber en estos momentos\n\nIntentalo despues");
+			alert(self.options.errMsg);
 		}
 
 		//remove/hide

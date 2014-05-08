@@ -11,9 +11,9 @@ function main(data, translation) {
 	}
 
 	//click listener for options button
-	$('#options').click(function() {
-		openTab("options");
-	});
+	$('#options')
+		.click(function() {openTab("options");})
+		.text(translation['optsFooter2'])
 
 	var selectedAccount; 				//to keep track of the selected account
 	var vidContainer = $('#videos'); 	//div containing videos
@@ -51,7 +51,7 @@ function main(data, translation) {
 			//loading msg
 			updateMsg.eq(0).text(translation['popupMsg1']);
 			//if we don't have any cache, we need to connect to Youtube
-			loadNewVideos(0);
+			loadNewVideos(currentAccount);
 		}
 
 		function loadCache() {
@@ -295,8 +295,8 @@ function main(data, translation) {
 				'<span class="t">' + videos[i].title + '</span>' +
 				'<span class="description">' + videos[i].description.substring(0, 120) + '</span>' +
 				'</a></div>'+
-				'<span class="details">Subido por: <i>'+videos[i].author+'</i></span>' +
-				'<button class="details">Marcar como visto</button></div>';
+				'<span class="details">'+translation['uploadedBy']+' <i>'+videos[i].author+'</i></span>' +
+				'<button class="details">'+translation['contextMenu']+'</button></div>';
 		}
 		return html;
 	}
@@ -494,7 +494,7 @@ function main(data, translation) {
 				return bool ? false : '<span class="title">' + title + '</span>';
 			}
 		}
-		return bool ? true : '<span class="title">' + title + '</span> <span class="newVid">(' + newTxt + ')</span>';;
+		return bool ? true : '<span class="title">' + title + '</span> <span class="newVid">(' + newTxt + ')</span>';
 	}
 
 	/**

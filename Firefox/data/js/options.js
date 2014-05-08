@@ -107,6 +107,12 @@ function main(ExtensionData, translation, usage) {
 		return false;
 	});
 	btnDwnSettings.click(function() {
+		//clean cache - we only want the account info and not any videos loaded and stuff
+		ExtensionData.cache = [];
+		for (var i = ExtensionData.channels.length - 1; i >= 0; i--) {
+			//ExtensionData.channels[i].videoTitles = [];
+			ExtensionData.channels[i].newVideos = false;
+		}
 		saveSettings(JSON.stringify(ExtensionData));
 		return false;
 	});

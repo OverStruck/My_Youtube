@@ -148,12 +148,9 @@ DATA.load(function (ExtensionData) {
 
     //----------options page------------------------------------------
     pageMod.PageMod({
-        include: [
-            self.data.url(optionsURL)
-        ],
+        include: self.data.url(optionsURL),
         contentScriptFile: [
             self.data.url("js/jquery2.js"),
-            //self.data.url("js/FileSaver.js"),
             self.data.url("js/options.js")
         ],
         //port event listeners

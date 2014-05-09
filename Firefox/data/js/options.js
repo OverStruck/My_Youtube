@@ -1,41 +1,15 @@
 //get all strings to translate
 var strings = [];
-var objects = document.getElementsByTagName('*');
-for (var i = 0; i < objects.length; i++) {
-	if (objects[i].dataset && objects[i].dataset.message) {
-		strings.push(objects[i].dataset.message);
-	}
-}
 for (var i = 1; i <= 9; i++)
 	strings.push("errMsg" + i);
 
-$('#thx a').each(function (i) {
-	strings.push('thx'+i+'b');
-});
-
 strings.push("lang");
-
 //translate
 self.port.emit("translation", strings);
 self.port.once("translation", function(response) {
 	var translation = response.translation;
-	$('#home').attr('href', response.optionsURL);
-	$("#logo").css("background-image", "url('" + response.optionsURL + translation['lang'] + "/logo.png')");
-	$('body:first').fadeIn('fast');
-	if (window.location.href.indexOf('history') !== -1) {
-		return false;
-	}
-
-	for (var i = 0; i < objects.length; i++) {
-		if (objects[i].dataset && objects[i].dataset.message) {
-			objects[i].innerHTML = translation[objects[i].dataset.message];
-		}
-	}
-
-	$('#thx a').each(function (i) {
-		$(this).attr('title', translation['thx'+i+'b']);
-	});
-	$('#x').attr('href', translation['lang'] + '/history');
+	//../locales/es/logo.png
+	$("#logo").css("background-image", "url('./locales/" + translation['lang'] + "/logo.png')");
 	main(response.data, translation, response.usage);
 });
 

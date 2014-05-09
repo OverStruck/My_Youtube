@@ -25,7 +25,7 @@ DATA.load(function (ExtensionData) {
     const pageMod = require("sdk/page-mod"); //needed to add contentscripts
     const self = require("sdk/self");
 
-    const optionsURL = "http://www.juanix.net/apps/my-youtube/";
+    const optionsURL = "options.html";
 
     //first install
     if (ExtensionData.isNewInstall) {
@@ -149,7 +149,7 @@ DATA.load(function (ExtensionData) {
     //----------options page------------------------------------------
     pageMod.PageMod({
         include: [
-            optionsURL + '*'
+            self.data.url(optionsURL)
         ],
         contentScriptFile: [
             self.data.url("js/jquery2.js"),
@@ -457,12 +457,25 @@ DATA.load(function (ExtensionData) {
     }
 
     function notify(num) {
-        var videoS = (num > 1) ? "videos" : "video";
-        var has_have = (num > 1) ? "have" : "has";
+        var notificationText = num
+        if (translate('lang') === 'es') 
+        {
+            if (num > 1)
+                notificationText += ' nuevos videos han sido subidos';
+            else
+                notificationText += ' nuevo video ha sido subido';
+        }
+        else
+        {
+            if (num > 1)
+                notificationText += ' new videos have been uploaded';
+            else
+                notificationText += ' new video has been';
+        }
         notifications.notify({
             title: translate("extName"),
             iconURL: self.data.url("icons/icon48.png"),
-            text: translate("notificationText", num.toString(), videoS, has_have)
+            text: notificationText
         });
     }
 

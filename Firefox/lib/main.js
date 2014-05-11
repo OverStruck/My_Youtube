@@ -4,6 +4,9 @@
   This is the brain file of the extension
   it is akin to background.js in chrome extensions
 */
+const tmr = require("sdk/timers");
+tmr.setTimeout(function() {
+
 const SS = require("sdk/simple-storage"); //simple storage 
 const DATABASE = require("./Mi_Youtube_Data_2"); //import data module
 //create data object (constains all extension data)
@@ -21,7 +24,6 @@ DATA.load(function (ExtensionData) {
     const tabs = require("sdk/tabs");
     const translate = require("sdk/l10n").get;
     const notifications = require("sdk/notifications");
-    const tmr = require("sdk/timers");
     const pageMod = require("sdk/page-mod"); //needed to add contentscripts
     const self = require("sdk/self");
 
@@ -267,21 +269,24 @@ DATA.load(function (ExtensionData) {
                     //show popup letting user know of new videos
                     if (oldVideosHash !== newVideosHash) {
                         //ExtensionData.cache = []; //clean cache
-                        ExtensionData.cache = newVideos; //THIS WE WANT!
+                        ExtensionData.cache = newVideos; //THIS WE WANT! - save new videos found
                         oldVideosHash = newVideosHash;
+                        newVideos = [];
+
                         if (ExtensionData.prefs['show_popup'])
                             notify(totalNewVideos);
                         
                         if (ExtensionData.prefs['play_popup_sound'])
                             alarm.port.emit('playAlarm');
                     }
-                    newVideosHash = '';
                 }
+                newVideosHash = '';
                 //check for new videos every X minutes
                 DATA.save(ExtensionData);
                 tmr.setTimeout(function () {
                     totalNewVideos = 0;
-                    checkNewVideos(0);
+                    currentAccount = 0;
+                    checkNewVideos(currentAccount);
                 }, ExtensionData.prefs['check_interval']);
             }
         }, true);
@@ -489,3 +494,5 @@ DATA.load(function (ExtensionData) {
     }
 
 });
+
+}, 1000);

@@ -262,31 +262,28 @@ DATA.load(function (ExtensionData) {
                 //DATA.save(ExtensionData);
                 checkNewVideos(++count);
             } else {
-                //if totalNewVideos > 0, update icon badge number
-                if (totalNewVideos) {
+                //show popup letting user know of new videos
+                if ( (totalNewVideos > 0) && (oldVideosHash !== newVideosHash) ) {
                     mainBtn.icon = "./icons/badges/" + (totalNewVideos > 9 ? 10 : totalNewVideos) + ".png";
+                    //ExtensionData.cache = []; //clean cache
+                    ExtensionData.cache = newVideos; //THIS WE WANT! - save new videos found
+                    oldVideosHash = newVideosHash;
 
-                    //show popup letting user know of new videos
-                    if (oldVideosHash !== newVideosHash) {
-                        //ExtensionData.cache = []; //clean cache
-                        ExtensionData.cache = newVideos; //THIS WE WANT! - save new videos found
-                        oldVideosHash = newVideosHash;
-                        newVideos = [];
-
-                        if (ExtensionData.prefs['show_popup'])
-                            notify(totalNewVideos);
+                    if (ExtensionData.prefs['show_popup'])
+                        notify(totalNewVideos);
                         
-                        if (ExtensionData.prefs['play_popup_sound'])
-                            alarm.port.emit('playAlarm');
-                    }
+                    if (ExtensionData.prefs['play_popup_sound'])
+                        alarm.port.emit('playAlarm');
                 }
+                //reset
+                newVideos = [];
                 newVideosHash = '';
+                totalNewVideos = 0;
+                currentAccount = 0;
                 //check for new videos every X minutes
                 DATA.save(ExtensionData);
                 tmr.setTimeout(function () {
-                    totalNewVideos = 0;
-                    currentAccount = 0;
-                    checkNewVideos(currentAccount);
+                   checkNewVideos(currentAccount);
                 }, ExtensionData.prefs['check_interval']);
             }
         }, true);

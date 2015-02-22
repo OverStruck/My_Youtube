@@ -1,3 +1,5 @@
+//Firefox - Options.js
+
 //get all strings to translate
 var strings = [];
 for (var i = 1; i <= 9; i++)

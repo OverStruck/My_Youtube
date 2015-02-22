@@ -1,4 +1,6 @@
-﻿//localize
+﻿//Chrome - Options.js
+
+//localize
 var objects = document.getElementsByTagName('*');
 for (var i = 0; i < objects.length; i++) {
 	if (objects[i].dataset && objects[i].dataset.message) {

@@ -148,7 +148,7 @@ function main(data, translation) {
 			var self = $(this);
 				//the account name, ej: "PMVTutoriales"
 			var accountName = self.find('img:first').attr('title');
-				//we might need this to load videos
+				//the Youtube account ID which is some long string
 			var accountYoutubeID = self.attr('id');
 				//the account number (integer), ej: 7
 			var accountID = self.parent().data('id');
@@ -156,7 +156,7 @@ function main(data, translation) {
 			Sometimes account names have spaces, in which case we can't load its videos
 			so we use the youtube id which is secure
 			*/
-			var account = (accountName.indexOf(' ') >= 0 ? accountYoutubeID : accountName)
+			var account = accountYoutubeID;
 			//click listener
 			self.off("click").click(function(event) {
 				selectedAccount = accountID;

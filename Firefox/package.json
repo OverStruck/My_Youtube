@@ -1,27 +1,25 @@
 {
-	"preferences": 
-  [
-    {
-    		"type": "control",
-    		"label": "Options Page",
-    		"name": "btnOptions",
-   	 		"title": "Click to display full options page:"
-		}
-  ], 
+    "preferences": [{
+        "type": "control",
+        "label": "Options Page",
+        "name": "btnOptions",
+        "title": "Click to display full options page:"
+    }],
 
-  "name": "my-youtube",
-  "title": "My Youtube",
-  "id": "MyYoutube@ManlyBytes.com",
-  "description": "Never miss another video of your favorite Youtubers",
-  "author": "ManlyBytes.com",
-  "license": "GNU V2",
-  "version": "1.3.0.1",
+    "name": "my-youtube",
+    "title": "My Youtube",
+    "id": "MyYoutube@juanix.net",
+    "description": "Never miss another video of your favorite Youtubers",
+    "author": "Juanix.net",
+    "license": "GNU V2",
+    "version": "1.3.0.2",
 
-  "icon": "data//icons//icon48.png",
-  "permissions": {
-    "cross-domain-content": [
-    	"http://*.youtube.com/*",
-        "https://*.youtube.com/*"
+    "icon": "data//icons//icon48.png",
+    "permissions": {
+        "unsafe-content-script": true,
+        "cross-domain-content": [
+            "http://*.youtube.com/*",
+            "https://*.youtube.com/*"
         ]
-	}
+    }
 }

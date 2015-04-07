@@ -12,10 +12,10 @@ self.port.once("translation", function(response) {
     var translation = response.translation;
     //../locales/es/logo.png
     $("#logo").css("background-image", "url('./locales/" + translation.lang + "/logo.png')");
-    main(response.data, translation, response.usage);
+    main(response.data, translation, response.usage, response.addonVersion);
 });
 
-function main(ExtensionData, translation, usage) {
+function main(ExtensionData, translation, usage, addonVersion) {
     //dom elements
     var fieldAdd = $('#add-field');
     var btnAdd = $('#btn-add');
@@ -302,7 +302,7 @@ function main(ExtensionData, translation, usage) {
         //})();
         var blob = new Blob([
             "──────────────────────────────────────────────────────────────────────\n\n",
-            "My Youtube Beta 3\n\n",
+            "My Youtube " + addonVersion + "\n\n",
             "THIS FILE CONTAINS YOUR MY-YOTUBE SETTINGS\n",
             "THIS INFORMATION IS NOT ENCRYPTED, IT CAN BE EASILY READ\n",
             "SAVE IT IN A SAFE PLACE OR DELETE IT WHEN NO LONGER NEEDED\n\n",
@@ -311,12 +311,13 @@ function main(ExtensionData, translation, usage) {
             //'<MyYoutube key="' + (!config.user_config.in_key ? 'ASK' : psw) + '">',
             '<MyYoutube>',
             //Tea.encrypt(data, psw),
-            btoa(data),
+            utf8_to_b64(data),
             "</MyYoutube>"
         ], {
             type: "text/plain;charset=utf-8"
         });
-        unsafeWindow.saveAs(blob, "MyYoutube.settings");
+
+        unsafeWindow.saveAs(cloneInto(blob, unsafeWindow), "MyYoutube.settings");
 
         //if (!config.user_config.in_key) {
         //	$('#key').text(psw);
@@ -358,7 +359,7 @@ function main(ExtensionData, translation, usage) {
                 //	key = prompt('Escribe tu llave de encriptacion');
                 //}
                 settings = data[1];
-                settings = atob(settings);
+                settings = b64_to_utf8(settings);
                 try {
                     settings = JSON.parse(settings);
                 } catch (e) {
@@ -375,5 +376,18 @@ function main(ExtensionData, translation, usage) {
             //Read the text file
             reader.readAsText(file);
         });
+    }
+
+    /*
+        In most browsers, calling window.btoa() on a Unicode string will cause a Character Out Of Range exception
+        see: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/btoa
+    */
+
+    function utf8_to_b64(str) {
+        return window.btoa(unescape(encodeURIComponent(str)));
+    }
+
+    function b64_to_utf8(str) {
+        return decodeURIComponent(escape(window.atob(str)));
     }
 }

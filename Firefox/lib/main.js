@@ -4,13 +4,15 @@
   This is the brain file of the extension
   it is akin to background.js in chrome extensions
 */
-const tmr = require("sdk/timers");
+var tmr = require("sdk/timers");
 tmr.setTimeout(function() {
 
-    const SS = require("sdk/simple-storage"); //simple storage 
-    const DATABASE = require("./Mi_Youtube_Data_2"); //import data module
-    //create data object (constains all extension data)
-    const DATA = new DATABASE.MY_YOUTUBE_DATA(SS.storage);
+    var SS = require("sdk/simple-storage"); //simple storage 
+    var DATABASE = require("./Mi_Youtube_Data_2"); //import data module
+    //create data object (varains all extension data)
+    var DATA = new DATABASE.MY_YOUTUBE_DATA(SS.storage);
+    //we want the user's FF version for version-dependent features
+    var FF_VERSION = parseInt(require("sdk/system").version);
     //todo - inform user he's using too much info
     //SS.on("OverQuota", function() {
     //window.alert('Storage limit exceeded');
@@ -18,21 +20,21 @@ tmr.setTimeout(function() {
 
     DATA.load(function(ExtensionData) {
         //---------required modules & setup -------------------------------
-        //const {ActionButton} = require("sdk/ui/button/action"); //button ui
-        const {
+        //var {ActionButton} = require("sdk/ui/button/action"); //button ui
+        var {
             ToggleButton
         } = require('sdk/ui/button/toggle');
-        const {
+        var {
             Panel
         } = require("sdk/panel"); //panel (for main popup)
-        const Request = require("sdk/request").Request; //network requests
-        const tabs = require("sdk/tabs");
-        const translate = require("sdk/l10n").get;
-        const notifications = require("sdk/notifications");
-        const pageMod = require("sdk/page-mod"); //needed to add contentscripts
-        const self = require("sdk/self");
+        var Request = require("sdk/request").Request; //network requests
+        var tabs = require("sdk/tabs");
+        var translate = require("sdk/l10n").get;
+        var notifications = require("sdk/notifications");
+        var pageMod = require("sdk/page-mod"); //needed to add contentscripts
+        var self = require("sdk/self");
 
-        const optionsURL = "options.html";
+        var optionsURL = "options.html";
 
         //first install
         if (ExtensionData.isNewInstall) {
@@ -58,13 +60,13 @@ tmr.setTimeout(function() {
         translations['contextMenu'] = translate('contextMenu');
         translations['uploadedBy'] = translate('uploadedBy');
 
-        for (let i = 0; i <= 3; i++) {
-            let name = "popupE" + i + "_B";
-            let name2 = "popupE" + i + "_H";
+        for (var i = 0; i <= 3; i++) {
+            var name = "popupE" + i + "_B";
+            var name2 = "popupE" + i + "_H";
 
             translations[name] = translate(name);
             translations[name2] = translate(name2);
-        };
+        }
 
         //----------create extension main button & popup setup--------------------------------
         var mainWindow; //main popup window
@@ -72,16 +74,12 @@ tmr.setTimeout(function() {
         var mainBtn = ToggleButton({
             id: "mainBtn",
             label: "My Youtube",
+            badge: '',
             icon: {
                 "16": "./icons/icon16.png", //paths relative to the data folder
                 "38": "./icons/icon38.png",
                 "48": "./icons/icon48.png"
             },
-            //onClick: function (state) {
-            //create and initialize the main popup window
-            //initializeMainwindow();
-            //mainWindow.show();
-            //}
             onChange: function(state) {
                 if (state.checked) {
                     initializeMainwindow();
@@ -170,7 +168,7 @@ tmr.setTimeout(function() {
             ],
             //port event listeners
             onAttach: function(worker) {
-                let translation = {};
+                var translation = {};
                 //listen for translation request
                 worker.port.once("translation", function(strings) {
                     for (var i = 0; i < strings.length; i++) {
@@ -182,7 +180,8 @@ tmr.setTimeout(function() {
                         data: ExtensionData,
                         translation: translation,
                         usage: SS.quotaUsage,
-                        optionsURL: optionsURL
+                        optionsURL: optionsURL,
+                        addonVersion: self.version
                     });
                 });
 
@@ -200,7 +199,7 @@ tmr.setTimeout(function() {
 
         //------Setup alarm------------------------------------------
         if (ExtensionData.prefs['play_popup_sound']) {
-            const alarm = require("sdk/page-worker")
+            var alarm = require("sdk/page-worker")
                 .Page({
                     contentScript: "self.port.on('playAlarm', function() {document.getElementById('alarm').play();});",
                     contentScriptWhen: "ready",
@@ -277,7 +276,12 @@ tmr.setTimeout(function() {
                 } else {
                     //show popup letting user know of new videos
                     if ((totalNewVideos > 0) && (oldVideosHash !== newVideosHash)) {
-                        mainBtn.icon = "./icons/badges/" + (totalNewVideos > 9 ? 10 : totalNewVideos) + ".png";
+                        if (FF_VERSION >= 36) {
+                            mainBtn.badge = totalNewVideos;
+                        } else {
+                            mainBtn.icon = "./icons/badges/" + (totalNewVideos > 9 ? 10 : totalNewVideos) + ".png";
+                        }
+
                         //ExtensionData.cache = []; //clean cache
                         ExtensionData.cache = newVideos; //THIS WE WANT! - save new videos found
                         oldVideosHash = newVideosHash;
@@ -305,10 +309,10 @@ tmr.setTimeout(function() {
         function getYoutuber(account, callback, getVideos) {
             var url = 'http://gdata.youtube.com/feeds/api/users/' + account;
             var params = {
-                    "v": 2,
-                    "alt": 'json'
-                }
-                //extra parameters needed to get account videos
+                "v": 2,
+                "alt": 'json'
+            };
+            //extra parameters needed to get account videos
             if (getVideos) {
                 url += '/uploads';
                 params['start-index'] = 1;
@@ -433,8 +437,10 @@ tmr.setTimeout(function() {
 
             //update badge
             mainWindow.port.on("updateBadge", function() {
-                if (mainBtn.icon.indexOf("badges") !== -1) {
-                    let newIcon = mainBtn.icon.replace(/^\D+/g, '');
+                if (FF_VERSION >= 36) {
+                    mainBtn.badge = (mainBtn.badge - 1) > 0 ? mainBtn.badge - 1 : '';
+                } else if (mainBtn.icon.indexOf("badges") !== -1) {
+                    var newIcon = mainBtn.icon.replace(/^\D+/g, '');
                     newIcon = parseInt(newIcon) - 1;
                     if (newIcon > 0)
                         mainBtn.icon = "./icons/badges/" + newIcon + ".png";
@@ -472,7 +478,7 @@ tmr.setTimeout(function() {
         }
 
         function notify(num) {
-            var notificationText = num
+            var notificationText = num;
             if (translate('lang') === 'es') {
                 if (num > 1)
                     notificationText += ' nuevos videos han sido subidos';

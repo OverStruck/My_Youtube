@@ -26,22 +26,26 @@ self.port.once("channels", function(channels) {
             break;
         }
     }
-
+    //"add youtuber" button
     var addBtn = document.createElement('button');
     addBtn.setAttribute('class', 'yt-uix-button yt-uix-button-size-default yt-uix-button-has-icon yt-uix-button-subscribe-branded');
     addBtn.setAttribute('style', 'background-image: linear-gradient(to top, rgba(199, 26, 166, 1) 0px, rgba(230, 34, 200, 1) 100%); margin-right: 12px;');
 
-    var btnTxt = document.createElement('span');
-    btnTxt.setAttribute('style', 'margin-left:5px;');
+    //"add youtuber" button span elem
+    var addBtnSpanEl = document.createElement('span');
+    addBtnSpanEl.setAttribute('style', 'margin-left:5px;');
+    //"add youtuber" button text
+    var addBtnTxt;
 
     if (isNewYoutuber) {
-        btnTxt.innerHTML = self.options.btnAddTxt;
+        addBtnTxt = document.createTextNode(self.options.btnAddTxt);
         addBtn.addEventListener('click', addYoutuber);
     } else {
-        btnTxt.innerHTML = self.options.btnAddedTxt;
+        addBtnTxt = document.createTextNode(self.options.btnAddedTxt);
         addBtn.setAttribute('disabled', 'disabled');
     }
-    addBtn.appendChild(btnTxt);
+    addBtnSpanEl.appendChild(addBtnTxt);
+    addBtn.appendChild(addBtnSpanEl);
 
     var containerClass = onWatchPage ? '' : ' with-preferences';
     var container = document.getElementsByClassName('yt-uix-button-subscription-container' + containerClass)[0];
@@ -49,13 +53,19 @@ self.port.once("channels", function(channels) {
     container.insertBefore(addBtn, susBtn);
 
     function addYoutuber() {
-        if (document.getElementById('myY-modal')) {
-            document.getElementById('myY-modal').setAttribute('style', '');
+        var modal = document.getElementById('myY-modal');
+        if (modal) {
+            modal.setAttribute('style', '');
         } else {
-            var modal = document.createElement('div');
+            modal = document.createElement('div');
             modal.setAttribute('class', 'modal');
             modal.setAttribute('id', 'myY-modal');
-            modal.innerHTML = '<div style="font-weight: bolder">' + self.options.btnAddingTxt + '...</div>';
+
+            var modalContent = document.createElement('div');
+            modalContent.setAttribute('style', 'font-weight: bolder');
+            modalContent.textContent = self.options.btnAddingTxt;
+
+            modal.appendChild(modalContent);
             document.body.appendChild(modal);
         }
 
@@ -66,9 +76,11 @@ self.port.once("channels", function(channels) {
         if (status.isError === false) {
             addBtn.setAttribute('disabled', 'disabled');
             addBtn.removeEventListener('click', addYoutuber, false);
-            btnTxt.innerHTML = self.options.btnAddedTxt;
+
+
+            addBtnSpanEl.textContent = self.options.btnAddedTxt;
         } else {
-            alert(self.options.errMsg);
+            window.alert(self.options.errMsg);
         }
 
         //remove/hide

@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+    <head>
+        <title data-message="optionsHeaderTitle">Mi Youtube</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" type="text/css" href="../../css/options.css">
+        <style type="text/css">
+            .desc {font-style: italic;color: rgb(165, 165, 165);padding: 5px;font-size: 14px;}
+            h1,h2,h3 {margin: 5px 0; font-weight: lighter}
+            ul {margin-top: 1px;}
+            li {margin-top: 3px; margin-bottom: 3px;}
+            #options {width: 800px;margin: 0 auto;}
+        </style>
+    </head>
+    <body>
+        <div id="options">
+            <div id="logo"></div>
+            <div class="hbox">
+                <h2 data-message="optsFooter"></h2>
+				<h3>Versión 1.2.7</h3>
+				<ul>
+                    <li>
+                    Extensión actualizada para que funcione en la versión 31 de Google Chrome<br>
+                </ul>
+				<h3>Versión 1.2.5</h3>
+                 <ul>
+                    <li>
+                    Bug #1 reparado. <br>
+                    <span class="desc">El bug hacia que la extensión no actualizara correctamente la lista de videos cuando le das clic a un nuevo video. Esto hacia que videos ya vistos fueran marcados como nuevos.</span>
+                </ul>
+				<h3>Versión 1.2.3</h3>
+                 <ul>
+                    <li>
+                    Se ha añadido la opción de marcar un video como visto. <br>
+                    <span class="desc">Solo da click derecho sobre el video que quieras marcar, y da clic donde dice "Marcar video como visto"</span>
+                </ul>
+                <img src="../../images/0.png" alt="Context Menu" >
+				<h3>Versión 1.2</h3>
+                <ul>
+                    <li>
+                    Se ha añadido un sistema de caché para los nuevos vídeos subidos. <br>
+                    <span class="desc">Básicamente, esto significa que una vez que los nuevos vídeos sean encontrados y se cargados, no se extraeran frescos de Youtube cada vez que haga clic en el icono de la extensión. Esto acelera el proceso de ver varios nuevos videos. El caché se limpia una vez que nuevos vídeos son encuentrados en un procceso que corre en segundo plano.</span>
+                    </li>
+                    <li>Se Añadio esta página de "Historial" para aquellos interesados ​​en lo que es nuevo / cambiado.</li>
+                    <li>Se ha añadido un botón "Limpiar Caché" a la página de opciones. Estoy seguro que saben que hace.</li>
+                    <li>Página de opciones actualizada con enlaces a redes sociales e información pertinente.</li>
+                </ul>
+                <h3>Versión 1.1</h3>
+                <ul>
+                    <li>
+                    Ahora por defecto sólo los nuevos vídeos se muestran cuando haces clic en el icono de la extensión. <br>
+                    <span class="desc">De esa manera ya no tienes que ir a través de cada cuenta para ver los nuevos vídeos subidos.</span>
+                    </li>
+                </ul> 
+            </div>
+        </div>
+        <div id="footer">Copyright &copy; <b>Juanix.net</b> 2013 |
+        <a href="../../options.html"><span>Opciones</span></a></div>
+        <script src="js/jquery2.js" type="text/javascript"></script>
+        <script src="js/Mi_Youtube_Data.js" type="text/javascript"></script>
+        <script src="js/options.js" type="text/javascript"></script>
+    </body>
+</html>

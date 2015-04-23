@@ -73,8 +73,8 @@ function main(data, translation) {
 		//@param i integer the account index
 		function loadNewVideos(i) {
 			updateMsg.eq(1).text(data.channels[i].name);
-			loadVideos(data.channels[i].id).done(function(response) {
-				var videos = proccessYoutubeFeed(response.feed);
+			loadVideos(data.channels[i].uploadsPlayListId).done(function(response) {
+				var videos = proccessYoutubeFeed(response.items);
 				var save = false;
 				if (videos) {
 					var account = {
@@ -135,7 +135,7 @@ function main(data, translation) {
 		for (var i = 0; i < data.channels.length; i++) {
 			var account = data.channels[i];
 			//populate html
-			sidebarHTML += '<div class="ss" data-id="' + i + '"><a href="#" id="' + account.id + '">' +
+			sidebarHTML += '<div class="ss" data-id="' + i + '"><a href="#" id="' + account.uploadsPlayListId + '">' +
 				'<img src="' + account.thumbnail + '"' +
 				'alt="' + account.name + '" width="60"' +
 				' title="' + account.name + '"></a></div>';
@@ -148,22 +148,17 @@ function main(data, translation) {
 			var self = $(this);
 				//the account name, ej: "PMVTutoriales"
 			var accountName = self.find('img:first').attr('title');
-				//the Youtube account ID which is some long string
-			var accountYoutubeID = self.attr('id');
+				//the Youtube account PLAYLIST ID which is some long string
+			var accountPlayListId = self.attr('id');
 				//the account number (integer), ej: 7
 			var accountID = self.parent().data('id');
-			/* 
-			Sometimes account names have spaces, in which case we can't load its videos
-			so we use the youtube id which is secure
-			*/
-			var account = accountYoutubeID;
 			//click listener
 			self.off("click").click(function(event) {
 				selectedAccount = accountID;
 				$('.selected:first').removeClass('selected');
 				self.parent().addClass('selected');
-				loadVideos(account).done(function(response) {
-					var videos = proccessYoutubeFeed(response.feed);
+				loadVideos(accountPlayListId).done(function(response) {
+					var videos = proccessYoutubeFeed(response.items);
 					if (videos) {
 						var html = generateSideBarVideosHTML(videos);
 						//display account name
@@ -180,18 +175,19 @@ function main(data, translation) {
 
 	/**
 	 * Loads most recent Youtube videos from selected account
-	 * @param {String} accountName the account name or ID
+	 * @param {String} playListId the id of the uploads play list
 	 */
-	function loadVideos(accountName) {
+	function loadVideos(uploadsPlayListId) {
 		return $.ajax({
-			url: 'https://gdata.youtube.com/feeds/api/users/' + accountName + '/uploads',
+			url: 'https://www.googleapis.com/youtube/v3/playlistItems',
 			dataType: 'json',
 			cache: false,
 			data: {
-				v: 2,
-				alt: 'json',
-				"start-index": 1,
-				"max-results": 4
+				'part': 'snippet',
+                'key': 'AIzaSyBbTkdQ5Pl_tszqJqdafAqF0mVWWngv9HU',
+                'maxResults': 4,
+                'playlistId': uploadsPlayListId,
+                'fields': 'items(snippet,status)'
 			}
 		});
 	}
@@ -202,31 +198,36 @@ function main(data, translation) {
 	 * @return {Array} videos an array containing objects with each videos' meta-data
 	 */
 	function proccessYoutubeFeed(data) {
-		var feed = data.entry;
-		var videos = [];
-		if (feed === undefined) {
-			//error this account has no videos
-			return false;
-		}
-		for (var i = 0; i < feed.length; i++) {
-			var entry = feed[i];
-			var title = entry.title.$t; //Video title
-			var link = entry.link[0].href; //Video link
-			var img = entry.media$group.media$thumbnail[1].url; //video thumbnail
-			var description = entry.media$group.media$description.$t; //video description
-			var author = entry.author[0].name.$t; //creato's Youtube name
+            var videos = [];
+            if (data === undefined) {
+                //error this account has no videos
+                return false;
+            }
 
-			videos.push({
-				"id": i, //the video number (0 -> 3)
-				"title": title,
-				"url": link,
-				"thumbnail": img,
-				"description": description,
-				"author": author
-			});
-		}
-		return videos;
-	}
+            var snippets;
+            var youtubeVideoUrl = 'https://www.youtube.com/watch?v=';
+
+            for (var i = 0; i < data.length; i++) {
+
+                snippets = data[i];
+                for (var key in snippets) {
+                    if (snippets.hasOwnProperty(key)) {
+                        var snippet = snippets[key];
+
+                        videos.push({
+                            "id": i, //the video number (0 -> 3)
+                            "title": snippet.title,
+                            "url": youtubeVideoUrl + snippet.resourceId.videoId,
+                            "thumbnail": snippet.thumbnails.medium.url,
+                            "description": snippet.description,
+                            "author": snippet.channelTitle
+                        });
+                    }
+                }
+                
+            }
+            return videos;
+        }
 
 	/**
 	 * Display's the account's videos on the popup

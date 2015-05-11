@@ -73,7 +73,7 @@ function main(data, translation) {
 		//@param i integer the account index
 		function loadNewVideos(i) {
 			updateMsg.eq(1).text(data.channels[i].name);
-			loadVideos(data.channels[i].uploadsPlayListId).done(function(response) {
+			loadVideos(data.channels[i].id).done(function(response) {
 				var videos = proccessYoutubeFeed(response.items);
 				var save = false;
 				if (videos) {
@@ -135,7 +135,7 @@ function main(data, translation) {
 		for (var i = 0; i < data.channels.length; i++) {
 			var account = data.channels[i];
 			//populate html
-			sidebarHTML += '<div class="ss" data-id="' + i + '"><a href="#" id="' + account.uploadsPlayListId + '">' +
+			sidebarHTML += '<div class="ss" data-id="' + i + '"><a href="#" id="' + account.id + '">' +
 				'<img src="' + account.thumbnail + '"' +
 				'alt="' + account.name + '" width="60"' +
 				' title="' + account.name + '"></a></div>';
@@ -148,16 +148,21 @@ function main(data, translation) {
 			var self = $(this);
 				//the account name, ej: "PMVTutoriales"
 			var accountName = self.find('img:first').attr('title');
-				//the Youtube account PLAYLIST ID which is some long string
-			var accountPlayListId = self.attr('id');
+				//the Youtube account ID which is some long string
+			var accountYoutubeID = self.attr('id');
 				//the account number (integer), ej: 7
 			var accountID = self.parent().data('id');
+			/* 
+			Sometimes account names have spaces, in which case we can't load its videos
+			so we use the youtube id which is secure
+			*/
+			var account = accountYoutubeID;
 			//click listener
 			self.off("click").click(function(event) {
 				selectedAccount = accountID;
 				$('.selected:first').removeClass('selected');
 				self.parent().addClass('selected');
-				loadVideos(accountPlayListId).done(function(response) {
+				loadVideos(account).done(function(response) {
 					var videos = proccessYoutubeFeed(response.items);
 					if (videos) {
 						var html = generateSideBarVideosHTML(videos);
@@ -175,9 +180,9 @@ function main(data, translation) {
 
 	/**
 	 * Loads most recent Youtube videos from selected account
-	 * @param {String} playListId the id of the uploads play list
+	 * @param {String} accountName the account name or ID
 	 */
-	function loadVideos(uploadsPlayListId) {
+	function loadVideos(accountName) {
 		return $.ajax({
 			url: 'https://www.googleapis.com/youtube/v3/playlistItems',
 			dataType: 'json',
@@ -185,9 +190,10 @@ function main(data, translation) {
 			data: {
 				'part': 'snippet',
                 'key': 'AIzaSyBbTkdQ5Pl_tszqJqdafAqF0mVWWngv9HU',
+                'id': accountName,
                 'maxResults': 4,
-                'playlistId': uploadsPlayListId,
-                'fields': 'items(snippet,status)'
+                'playlistId': 'UUZgwLCu6tSLEUJ30METhJHg',
+                'fields': 'items(snippet%2Cstatus)'
 			}
 		});
 	}
@@ -218,7 +224,7 @@ function main(data, translation) {
                             "id": i, //the video number (0 -> 3)
                             "title": snippet.title,
                             "url": youtubeVideoUrl + snippet.resourceId.videoId,
-                            "thumbnail": snippet.thumbnails.medium.url,
+                            "thumbnail": thumbnails.medium.url,
                             "description": snippet.description,
                             "author": snippet.channelTitle
                         });

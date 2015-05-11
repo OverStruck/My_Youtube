@@ -13,12 +13,12 @@ self.port.once("channels", function(channels) {
         userName = document.getElementsByClassName('yt-user-info')[0];
         userName = userName.getElementsByTagName('a')[0];
         userName = userName.getAttribute('data-ytid');
-        userName = userName.trim();
+        userName = userName.substring(2).trim();
     } else {
         onWatchPage = false;
         userName = document.getElementsByClassName('yt-uix-subscription-button')[0];
         userName = userName.getAttribute('data-channel-external-id');
-        userName = userName.trim();
+        userName = userName.substring(2).trim();
     }
     for (var i = channels.length - 1; i >= 0; i--) {
         if (userName === channels[i].id) {

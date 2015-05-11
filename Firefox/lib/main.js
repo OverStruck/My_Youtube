@@ -19,32 +19,27 @@ tmr.setTimeout(function() {
     //window.alert('Storage limit exceeded');
     //});
 
-//---------required modules & setup -------------------------------
-        var {ToggleButton} = require('sdk/ui/button/toggle');
-        var {Panel} = require("sdk/panel"); //panel (for main popup)
+    DATA.load(function(ExtensionData) {
+        //---------required modules & setup -------------------------------
+        //var {ActionButton} = require("sdk/ui/button/action"); //button ui
+        var {
+            ToggleButton
+        } = require('sdk/ui/button/toggle');
+        var {
+            Panel
+        } = require("sdk/panel"); //panel (for main popup)
         var Request = require("sdk/request").Request; //network requests
         var tabs = require("sdk/tabs");
         var translate = require("sdk/l10n").get;
         var notifications = require("sdk/notifications");
         var pageMod = require("sdk/page-mod"); //needed to add contentscripts
         var self = require("sdk/self");
+
         var optionsURL = "options.html";
-        var upgradeURL = "upgrade.html";
-
-    DATA.load( function(ExtensionData, upgrade) {
-        if (upgrade) {
-            upgradeInit(ExtensionData);
-        }
-        else {
-            init(ExtensionData);
-        }
-    
-
-    function init(ExtensionData) {
 
         //first install
         if (ExtensionData.isNewInstall) {
-            getYoutuber("UUZgwLCu6tSLEUJ30METhJHg", function(response) {
+            getYoutuber("UCZgwLCu6tSLEUJ30METhJHg", function(response) {
                 response = response.json.items;
                 ExtensionData.channels[0].videoTitles = getVideoTitles(response);
                 ExtensionData.isNewInstall = false;
@@ -128,8 +123,7 @@ tmr.setTimeout(function() {
                     getYoutuber(userName, function(res) {
                         if (res.statusText === "OK") {
                             channel = res.json.items[0];
-                            var uploadsPlayListId = channel.contentDetails.relatedPlaylists.uploads;
-                            getYoutuber(uploadsPlayListId, function(response) {
+                            getYoutuber(userName, function(response) {
                                 if (response.statusText === "OK") {
                                     ExtensionData.channels.push({
                                         'id': channel.id,
@@ -137,8 +131,7 @@ tmr.setTimeout(function() {
                                         'thumbnail': channel.snippet.thumbnails.default.url,
                                         'videoTitles': getVideoTitles(response.json.items),
                                         'newVideos': false,
-                                        'url': 'https://www.youtube.com/channel/' + channel.id,
-                                        'uploadsPlayListId': uploadsPlayListId
+                                        'url': 'https://www.youtube.com/channel/' + channel.id
                                     });
                                     DATA.save(ExtensionData);
                                     worker.port.emit("done", {
@@ -214,6 +207,7 @@ tmr.setTimeout(function() {
         }
 
         //-------------check videos-----------------------------------
+
         var totalNewVideos = 0;
         var newVideosHash = '';
         var oldVideosHash = '';
@@ -226,7 +220,7 @@ tmr.setTimeout(function() {
         function checkNewVideos(count) {
             //we need to get the lastest data
             var account = ExtensionData.channels[count];
-            getYoutuber(account.uploadsPlayListId, function(response) {
+            getYoutuber(account.id, function(response) {
                 response = response.json;
                 var newVideosCount = compareVideos(getVideoTitles(response.items), account.videoTitles);
                 var save = false;
@@ -311,10 +305,42 @@ tmr.setTimeout(function() {
             }, true);
         }
 
+        function getYoutuber(account, callback, getVideos) {
+            //var url = 'http://gdata.youtube.com/feeds/api/users/' + account;
+            var url = 'https://www.googleapis.com/youtube/v3/';
+            var params = {
+                'part': 'snippet',
+                'key': 'AIzaSyBbTkdQ5Pl_tszqJqdafAqF0mVWWngv9HU',
+                'id': account
+            };
+            //extra parameters needed to get account videos
+            if (getVideos) {
+                url += 'playlistItems';
+                params.maxResults = 4;
+                params.playlistId = 'UUZgwLCu6tSLEUJ30METhJHg';
+                params.fields = 'items(snippet%2Cstatus)';
+            } else {
+                url += 'channels';
+            }
+
+            Request({
+                url: url,
+                headers: {
+                    'Cache-control': 'no-cache'
+                },
+                content: params,
+                onComplete: function(response) {
+                    console.log(url);
+                    //callback(response);
+                },
+            }).get();
+        }
+
         //@param Array data
         function getVideoTitles(data) {
             var result = [];
             var snippets;
+            console.log(data); return false;
 
             for (var i = 0; i < data.length; i++) {
                 snippets = data[i];
@@ -328,7 +354,6 @@ tmr.setTimeout(function() {
                 }
 
             }
-            return result;
         }
 
         function proccessYoutubeFeed(data) {
@@ -352,7 +377,7 @@ tmr.setTimeout(function() {
                             "id": i, //the video number (0 -> 3)
                             "title": snippet.title,
                             "url": youtubeVideoUrl + snippet.resourceId.videoId,
-                            "thumbnail": snippet.thumbnails.medium.url,
+                            "thumbnail": thumbnails.medium.url,
                             "description": snippet.description,
                             "author": snippet.channelTitle
                         });
@@ -405,8 +430,8 @@ tmr.setTimeout(function() {
         }*/
 
         function compareVideos(a, b) {
-            var length = a.length;
-            var diff = 0;
+            var length = a.length,
+                diff = 0;
             for (var i = 0; i < length; i++) {
                 var add = 1;
                 for (var j = 0; j < length; j++) {
@@ -542,111 +567,6 @@ tmr.setTimeout(function() {
             return true;
         }
 
-    }
-
-    function upgradeInit(ExtensionData) {
-        //tabs.open(self.data.url(upgradeURL));
-
-        /*pageMod.PageMod({
-            include: self.data.url(upgradeURL),
-            contentScriptFile: [
-                self.data.url("js/jquery2.js"),
-                self.data.url("js/upgrade.js")
-            ],
-            //port event listeners
-            onAttach: function(worker) {
-                var translation = {};
-                //listen for translation request
-                worker.port.once("translation", function(strings) {
-                    for (var i = 0; i < strings.length; i++) {
-                        //translate
-                        translation[strings[i]] = translate(strings[i]);
-                    }
-                    //send translation
-                    worker.port.emit("translation", {
-                        data: ExtensionData,
-                        translation: translation,
-                        addonVersion: self.version
-                    });
-                });
-            }
-        });*/
-
-        var channel;
-        var name;
-        var id;
-        /*
-        Due to the changes in Youtube's API V3, we need to update our channels array and objects
-        to include a new property "uploadsPlayListId" because we need that ID to retreive videos 
-        with the new API
-
-        So here we have to connect to Youtube to get this ID and update existing channels*/
-        (function upgradeChannels(iii) {
-            id = ExtensionData.channels[iii].id;
-            name = ExtensionData.channels[iii].name;
-
-            id = (iii > 0) ? 'UC' + id : id; //we need to add 'UC' to our old channel ids except for the first channel
-
-            getYoutuber(id, function(response) {
-                if (response.statusText === "OK") {
-                    channel = response.json.items[0];
-                    ExtensionData.channels[iii].uploadsPlayListId = channel.contentDetails.relatedPlaylists.uploads;
-                    ExtensionData.channels[iii].id = id;
-                } else {
-                    ExtensionData.channels[iii].uploadsPlayListId = null;
-                    ExtensionData.channels[iii].id = id;
-                    console.error('No uploads playlist id found');
-                }
-
-                if (iii < ExtensionData.channels.length - 1) {
-                        return upgradeChannels(++iii);
-                } else {
-                    DATA.save(ExtensionData);
-                    init(ExtensionData);
-                    return true;
-                }
-
-            }, false);
-        })(0);
-
-    }
-
-     /*
-        @param string account - the account id OR playlist id #confusing?
-        @param function callback the callback function
-        @param bool getVideos - get or not video data
-    */
-    function getYoutuber(account, callback, getVideos) {
-            //var url = 'http://gdata.youtube.com/feeds/api/users/' + account;
-            var url = 'https://www.googleapis.com/youtube/v3/';
-            var params = {
-                'part': 'snippet',
-                'key': 'AIzaSyBbTkdQ5Pl_tszqJqdafAqF0mVWWngv9HU',
-            };
-            //extra parameters needed to get account videos
-            if (getVideos) {
-                url += 'playlistItems';
-                params.maxResults = 4;
-                params.playlistId = account;
-                params.fields = 'items(snippet,status)';
-            } else {
-                params.id = account;
-                params.part += ',contentDetails';
-                url += 'channels';
-            }
-            
-            Request({
-                url: url,
-                headers: {
-                    'Cache-control': 'no-cache'
-                },
-                content: params,
-                onComplete: function(response) {
-                    callback(response);
-                },
-            }).get();
-    }
-
-} );
+    });
 
 }, 1000);

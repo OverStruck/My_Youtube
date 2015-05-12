@@ -77,7 +77,10 @@
       "message": "minute(s)"
    },
    "opts5": {
-      "message": "Open videos in the current tab"
+      "message": "Load settings"
+   },
+   "opts6": {
+      "message": "Space used"
    },
    "optsFooter": {
       "message": "What's new?"
@@ -99,6 +102,9 @@
    },
    "optsbtn4": {
       "message": "Clean cache"
+   },
+   "optsbtn4": {
+      "message": "Download settings"
    },
    "popupE1_B": {
       "message": "This account has no videos"
@@ -160,7 +166,22 @@
     "contextMenu": {
       "message": "Mark video as watched"
    },
+   "uploadedBy": {
+      "message": "Uploaded by:"
+   },
    "contextMenuMsg": {
       "message": "You've already watched this video .-."
+   },
+   "YtModBtnAddTxt": {
+      "message": "Add to My YouTube™"
+   },
+   "YtModBtnAddedTxt": {
+      "message": "Youtuber added to My YouTube™"
+   },
+   "YtModBtnAddingTxt": {
+      "message": "Adding Youtuber"
+   },
+   "YtModErrMsg": {
+      "message": "You can not add to this Youtuber right now\n\nTry later again"
    }
 }

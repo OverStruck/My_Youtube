@@ -2,7 +2,7 @@
 <!doctype html>
 <html>
 <head>
-    <title data-l10n-id="optionsHeaderTitle"></title>
+    <title data-message="optionsHeaderTitle"></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" />
@@ -14,79 +14,82 @@
             <div id="logo"></div>
             <div id="navBar">
                 <ul>
-                    <li><a href="#"><span data-l10n-id="homeURL"></span></a></li>
-                    <li><a href="#"><span data-l10n-id="contact"></span></a></li>
+                    <li><a href="#"><span data-message="homeURL"></span></a></li>
+                    <li><a href="#"><span data-message="contact"></span></a></li>
                 </ul>
             </div>
         </div>
         <div id="optionsMenu">
             <!--loading screen-->
             <div class="modal" style="display:none">
-                <div><span></span><span style="font-weight: bolder" data-l10n-id="YtModbtnAddingTxt"></span></div>
+                <div><span></span><span style="font-weight: bolder" data-message="YtModbtnAddingTxt"></span></div>
             </div>
 
             <div class="hbox">
                 <div class="groupbox flex1">
-                    <span data-l10n-id="opts1"></span>
+                    <!--<span data-message="opts1"></span>
                     <input type="text" id="add-field">
-                    <button id="btn-add" disabled data-l10n-id="optsbtn1"></button>
+                    <button id="btn-add" disabled data-message="optsbtn1"></button>-->
                     <div id="prefs">
                         <div>
                             <input type="checkbox" class="pref">
-                            <span data-l10n-id="opts2"></span>
+                            <span data-message="opts2"></span>
                         </div>
                         <div>
                             <input type="checkbox" class="pref">
-                            <span data-l10n-id="opts3"></span>
+                            <span data-message="opts3"></span>
                         </div>
                         <div>
-                            <span data-l10n-id="opts4"></span>
+                            <span data-message="opts4"></span>
                             <input type="number" class="pref">
-                            <span data-l10n-id="opts4b"></span>
+                            <span data-message="opts4b"></span>
                         </div>
                         <div>
-                            <span data-l10n-id="opts5"></span>
+                            <span data-message="opts5"></span>
                             <input type="file" id="upConfig" />
                         </div>
                         <div>
-                            <span data-l10n-id="opts6"></span>
+                            <span data-message="opts6"></span>
                             <span id="usage"></span>
                         </div>
                     </div>
                     <div style="margin-top:2em">
-                        <button id="btn-save" disabled data-l10n-id="optsbtn2"></button>
-                        <button id="btn-clean" data-l10n-id="optsbtn4"></button>
-                        <button id="btn-downloadSettings" class="purple" data-l10n-id="optsbtn5"></button>
+                        <button id="btn-save" disabled data-message="optsbtn2"></button>
+                        <button id="btn-clean" data-message="optsbtn4"></button>
+                        <button id="btn-downloadSettings" class="purple" data-message="optsbtn5"></button>
                         <span id="response"></span>
                     </div>
                 </div>
                 <div class="groupbox flex1">
                     <div id="thx" style="display: block;">
-                        <h3 data-l10n-id="thx1"></h3>
+                        <h3 data-message="thx1"></h3>
                         <p>
-                            <b data-l10n-id="thx2"></b>
-                            <a class="sml orange" href="http://chrome.google.com/webstore/detail/my-youtube/cphiahocnjphccbcpaabkhbppnilapeg/reviews?hl=es-419" title="Por la galería de Apps" target="_blank" data-l10n-id="thx3"></a>
-                            <a class="sml orange" href="http://youtube.com/subscription_center?add_user=PMVTutoriales" title="A mi canal de Youtube" target="_blank" data-l10n-id="thx4"></a>
-                            <a class="sml blue" href="http://www.facebook.com/JuanixTV" title="Da clic a 'Me gusta' :)" target="_blank" data-l10n-id="thx5"></a>
+                            <b data-message="thx2"></b>
+                            <a class="sml orange" href="http://chrome.google.com/webstore/detail/my-youtube/cphiahocnjphccbcpaabkhbppnilapeg/reviews?hl=es-419" title="Por la galería de Apps" target="_blank" data-message="thx3"></a>
+                            <a class="sml orange" href="http://youtube.com/subscription_center?add_user=PMVTutoriales" title="A mi canal de Youtube" target="_blank" data-message="thx4"></a>
+                            <a class="sml blue" href="http://www.facebook.com/JuanixTV" title="Da clic a 'Me gusta' :)" target="_blank" data-message="thx5"></a>
                         </p>
                         <hr>
                     </div>
                     <div class="groupbox">
-                        <h2 data-l10n-id="optsHeader1"></h2>
+                        <h2 data-message="optsHeader1"></h2>
                         <div id="youtubers">
                             <table cellpadding="3" cellspacing="1"></table>
                             <table cellpadding="3" cellspacing="1"></table>
                             <table cellpadding="3" cellspacing="1"></table>
                         </div>
                         <div style="clear:both;padding-top:1em;">
-                            <button id="btn-del" disabled data-l10n-id="optsbtn3"></button>
+                            <button id="btn-del" disabled data-message="optsbtn3"></button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="footer">Copyright &copy; <b>Juanix.net</b> 2014</div>
+        <div id="footer">Copyright &copy; <b>Juanix.net</b> 2015</div>
     </div>
+    <script src="js/jquery2.js" type="text/javascript"></script>
     <script src="js/FileSaver.js"></script>
+    <script src="js/Mi_Youtube_Data.js" type="text/javascript"></script>
+    <script src="js/options.js" type="text/javascript"></script>
 </body>
 </html>

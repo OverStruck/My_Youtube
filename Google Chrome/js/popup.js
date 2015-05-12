@@ -1,5 +1,17 @@
+//localize
+var objects = document.getElementsByTagName('*');
+for (var i = 0; i < objects.length; i++) {
+	if (objects[i].dataset && objects[i].dataset.message) {
+		objects[i].innerHTML = chrome.i18n.getMessage(objects[i].dataset.message);
+	}
+}
+
 //load user settings
 DB_load(function() {
+
+	$('#options').click(function() {
+		openTab("options.html");
+	});
 
 	//don't do anything if we don't have any accounts to work with
 	if (ExtensionData.accounts.length === 0) {
@@ -17,12 +29,12 @@ DB_load(function() {
 		clickedEl; //variable use to track the element click in case the user wants to mark a video as watched
 
 	generateSidebar();
-	ini();//start
+	initialize(); //start
 
 	/*
 		Now we're going to load ONLY any new uploaded videos
 	*/
-	function ini() {
+	function initialize() {
 
 		var length = ExtensionData.accounts.length - 1, //we'll loop through all saved accounts
 			newVideos = [], //array to keep all the new videos at
@@ -40,6 +52,15 @@ DB_load(function() {
 			If we have cached videos, we use that. We clean the cache when new videos are found in the background.
 		*/
 		if (ExtensionData.newVideosCache.length > 0) {
+			loadCache();
+		} else {
+			//loading msg
+			updateMsg.eq(0).text(chrome.i18n.getMessage('popupMsg1'));
+			//if we don't have any cache, we need to connect to Youtube
+			loadNewVideos(currentAccount);
+		}
+
+		function loadCache() {
 			//loop through cache found
 			for (var i = 0; i < ExtensionData.newVideosCache.length; i++) {
 				var cache = ExtensionData.newVideosCache[i];
@@ -52,21 +73,16 @@ DB_load(function() {
 			if (newVideosHTML !== '') {
 				displayVideos(newVideosHTML);
 			} else {
-				//error msg: no new videos found
-				error(3);
+				error(3); //error msg: no new videos found
 			}
-		} else {
-			//loading msg
-			updateMsg.eq(0).text(chrome.i18n.getMessage('popupMsg1'));
-			//if we don't have any cache, we need to connect to Youtube
-			loadNewVideos(0);
 		}
 
+		//@param i integer the account index
 		function loadNewVideos(i) {
 			updateMsg.eq(1).text(ExtensionData.accounts[i].name);
-			loadVideos(ExtensionData.accounts[i].id).done(function(feed) {
-				var videos = proccessYoutubeFeed(feed),
-					save = false;
+			loadVideos(ExtensionData.accounts[i].uploadsPlayListId).done(function(response) {
+				var videos = proccessYoutubeFeed(response.items);
+				var save = false;
 				if (videos) {
 					var account = {
 						"accountName": ExtensionData.accounts[i].name,
@@ -107,20 +123,20 @@ DB_load(function() {
 					}
 				}
 			});
-		};
+		}
 	}
 
 	/**
 	 * Creates the sidebar with the Youtube account's images & adds a click listener
 	 */
 	function generateSidebar() {
-		var sidebar = $('#sidebar'), //div containing sidebar
-			sidebarHTML = '';
+		var sidebar = $('#sidebar'); //div containing sidebar
+		var sidebarHTML = '';
 		//loop through accounts and display image on sidebar
 		for (var i = 0; i < ExtensionData.accounts.length; i++) {
 			var account = ExtensionData.accounts[i];
 			//populate html
-			sidebarHTML += '<div class="ss" data-id="' + i + '"><a href="#" id="' + account.id + '">' +
+			sidebarHTML += '<div class="ss" data-id="' + i + '"><a href="#" id="' + account.uploadsPlayListId + '">' +
 				'<img src="' + account.thumbnail + '"' +
 				'alt="' + account.name + '" width="60"' +
 				' title="' + account.name + '"></a></div>';
@@ -130,25 +146,20 @@ DB_load(function() {
 
 		//add click listener to side bar
 		sidebar.find('a').each(function() {
-			var self = $(this),
+			var self = $(this);
 				//the account name, ej: "PMVTutoriales"
-				accountName = self.find('img:first').attr('title'),
-				//we might need this to load videos
-				accountYoutubeID = self.attr('id'),
+			var accountName = self.find('img:first').attr('title');
+				//the Youtube account PLAYLIST ID which is some long string
+			var accountPlayListId = self.attr('id');
 				//the account number (integer), ej: 7
-				accountID = self.parent().data('id');
-			/* 
-			Sometimes account names have spaces, in which case we can't load its videos
-			so we use the youtube id which is secure
-			*/
-			var account = (accountName.indexOf(' ') >= 0 ? accountYoutubeID : accountName)
-			//click listener
-			self.click(function() {
+			var accountID = self.parent().data('id');
+
+			self.off("click").click(function(event) {
 				selectedAccount = accountID;
 				$('.selected:first').removeClass('selected');
 				self.parent().addClass('selected');
-				loadVideos(account).done(function(feed) {
-					var videos = proccessYoutubeFeed(feed);
+				loadVideos(accountPlayListId).done(function(response) {
+					var videos = proccessYoutubeFeed(response.items);
 					if (videos) {
 						var html = generateSideBarVideosHTML(videos);
 						//display account name
@@ -168,19 +179,20 @@ DB_load(function() {
 
 	/**
 	 * Loads most recent Youtube videos from selected account
-	 * @param {String} accountName the account name
+	 * @param {String} uploadsPlayListId the id of the uploads play list
 	 * @retun {Object} promise the jQuery promise of being done
 	 */
-	function loadVideos(accountName) {
+	function loadVideos(uploadsPlayListId) {
 		return $.ajax({
-			url: 'https://gdata.youtube.com/feeds/api/users/' + accountName + '/uploads',
+			url: 'https://www.googleapis.com/youtube/v3/playlistItems',
 			dataType: 'json',
 			cache: false,
 			data: {
-				v: 2,
-				alt: 'json',
-				"start-index": 1,
-				"max-results": 4
+				'part': 'snippet',
+                'key': 'AIzaSyBbTkdQ5Pl_tszqJqdafAqF0mVWWngv9HU',
+                'maxResults': 4,
+                'playlistId': uploadsPlayListId,
+                'fields': 'items(snippet,status)'
 			}
 		});
 	}
@@ -191,31 +203,36 @@ DB_load(function() {
 	 * @return {Array} videos an array containing objects with each videos' meta-data
 	 */
 	function proccessYoutubeFeed(data) {
-		var feed = data.feed.entry,
-			videos = [];
-		if (feed === undefined) {
-			//error this account has no videos
-			return false;
-		}
-		for (var i = 0; i < feed.length; i++) {
-			var entry = feed[i],
-				title = entry.title.$t, //Video title
-				link = entry.link[0].href, //Video link
-				img = entry.media$group.media$thumbnail[1].url, //video thumbnail
-				description = entry.media$group.media$description.$t, //video description
-				author = entry.author[0].name.$t; //creato's Youtube name
+            var videos = [];
+            if (data === undefined) {
+                //error this account has no videos
+                return false;
+            }
 
-			videos.push({
-				"id": i, //the video number (0 -> 3)
-				"title": title,
-				"url": link,
-				"thumbnail": img,
-				"description": description,
-				"author": author
-			});
-		}
-		return videos;
-	}
+            var snippets;
+            var youtubeVideoUrl = 'https://www.youtube.com/watch?v=';
+
+            for (var i = 0; i < data.length; i++) {
+
+                snippets = data[i];
+                for (var key in snippets) {
+                    if (snippets.hasOwnProperty(key)) {
+                        var snippet = snippets[key];
+
+                        videos.push({
+                            "id": i, //the video number (0 -> 3)
+                            "title": snippet.title,
+                            "url": youtubeVideoUrl + snippet.resourceId.videoId,
+                            "thumbnail": snippet.thumbnails.medium.url,
+                            "description": snippet.description,
+                            "author": snippet.channelTitle
+                        });
+                    }
+                }
+                
+            }
+            return videos;
+        }
 
 	/**
 	 * Display's the account's videos on the popup
@@ -232,18 +249,35 @@ DB_load(function() {
 	}
 
 	/**
-	 * Adds event listener to images to be use when marking a video as watched
-	 */
+	* right "click" event listener
+	*/
 	function activateRightClick() {
 		//add listener
-		$('.vid img').each(function(i) {
+		$('.vid').each(function(i) {
 			$(this).off('mousedown').on('mousedown', function(e) {
 				//right click
 				if (e.which === 3) {
-					clickedEl = e.target;
+					triggerClick(e.target, {
+						markingVideoAsWatched: false,
+						rightClick: true
+					});
 				}
-			})
+			});
 		});
+	}
+
+	/**
+	 * Main function when marking videos as watched
+	 * Basically it just triggers the click event which updates everything
+	 * We pass an extra parameter to prevent going to the video url
+	 * @param el the element clicked
+	 */
+	function triggerClick(el, params) {
+		var elem = $(el);
+		if (params.markingVideoAsWatched)//quick fix
+			elem = elem.siblings('div');
+
+		elem.trigger('click', params);
 	}
 
 	/**
@@ -261,7 +295,7 @@ DB_load(function() {
 	/**
 	 * Generates the neccesary HTML displaying the account's videos
 	 * @param {Array} videos an array containing objects with each videos' meta-data
-	 * @param {Number} onlyNew The account index in the accounts array
+	 * @param {Number} onlyNew The account index in the channels array
 	 * @return {String} html a long string containing html
 	 */
 	function generateNewVideosHTML(videos, onlyNew) {
@@ -271,12 +305,16 @@ DB_load(function() {
 			if (!videos[i].isNew) {
 				continue;
 			}
-			html += '<div class="vid" data-videoindex="' + videos[i].videoIndex + '" data-cacheindex="' + videos[i].cacheIndex + '" data-accountindex="' + onlyNew + '" ' +
-				'title="' + chrome.i18n.getMessage('popup_tooltip', [videos[i].author]) + '" >' +
-				'<a href="' + videos[i].url + '">' +
+			html += '<div class="container">' +
+				'<div class="vid" data-videourl="' + videos[i].url + '" data-videoindex="' + videos[i].videoIndex + '" data-cacheindex="' + videos[i].cacheIndex + '" data-accountindex="' + onlyNew + '" ' +
+				'title="' + chrome.i18n.getMessage('popup_tooltip') +" "+ videos[i].author + '" >' +
+				'<a href="#">' +
 				'<img src="' + videos[i].thumbnail + '" alt="' + videos[i].title + '" class="wrap thumb">' +
 				'<span class="t">' + videos[i].title + '</span>' +
-				'<span class="description">' + videos[i].description.substring(0, 120) + '</span></a></div>';
+				'<span class="description">' + videos[i].description.substring(0, 120) + '</span>' +
+				'</a></div>'+
+				'<span class="details">'+chrome.i18n.getMessage('uploadedBy')+' <i>'+videos[i].author+'</i></span>' +
+				'<button class="details">'+chrome.i18n.getMessage('contextMenu')+'</button></div>';
 		}
 		return html;
 	}
@@ -289,11 +327,13 @@ DB_load(function() {
 	function generateSideBarVideosHTML(videos) {
 		var html = '';
 		for (var i = 0; i < videos.length; i++) {
-			html += '<div class="vid" data-videoid="' + videos[i].id + '" >' +
-				'<a href="' + videos[i].url + '">' +
+			html += '<div class="container">' +
+				'<div class="vid" data-videourl="' + videos[i].url + '" data-videoid="' + videos[i].id + '" >' +
+				'<a href="#">' +
 				'<img src="' + videos[i].thumbnail + '" alt="' + videos[i].title + '" class="wrap thumb">' +
 				'<span class="t">' + isNewVideo(videos[i].title) + '</span>' +
-				'<span class="description">' + videos[i].description.substring(0, 120) + '</span></a></div>';
+				'<span class="description">' + videos[i].description.substring(0, 120) + '</span>' +
+				'</a></div></div>';
 		}
 		return html;
 	}
@@ -303,6 +343,9 @@ DB_load(function() {
 	 */
 	function activateVideos() {
 		$('.vid').each(function(i) {
+			$(this).bind("contextmenu", function(event) {
+				return false;
+			});
 			//if user is viewing a particular account, we use a particular algorith
 			if (selectedAccount !== undefined) {
 				activateSideBarVideos(this, i);
@@ -320,25 +363,23 @@ DB_load(function() {
 	function activateNewVideos(_this) {
 		var self = $(_this);
 
-		self.off('click').click(function(event, markingVideoAsWatched) {
+		self.off('click').click({markingVideoAsWatched: false, rightClick: false}, function(event, params) {
+			params = params || event.data; //defaults
 
-			var title = self.find('.t:first').text(), //current video title
-				url = self.find('a:first').attr('href'), //current video url
-				videoIndex = self.data('videoindex'), //the video position in the list of saved videos for the selected account
-				accountIndex = self.data('accountindex'), //the account position in the list of accounts
-				cacheIndex = self.data('cacheindex'), //the account position in the cache list of videos
-				currentVideos = ExtensionData.accounts[accountIndex].videoTitles, //our currently saved videos - might be outdated -
-				freshVideos = ExtensionData.newVideosCache[cacheIndex].videos; //videos fresh from Youtube
-
+			var title = self.find('.t:first').text(); //current video title
+			var url = self.data("videourl"); //current video url
+			var videoIndex = self.data('videoindex'); //the video position in the list of saved videos for the selected account
+			var accountIndex = self.data('accountindex'); //the account position in the list of channels
+			var cacheIndex = self.data('cacheindex'); //the account position in the cache list of videos
+			var currentVideos = ExtensionData.accounts[accountIndex].videoTitles; //our currently saved videos - might be outdated -
+			var freshVideos = ExtensionData.newVideosCache[cacheIndex].videos; //videos fresh from Youtube
 			/*
 				Update current list of saved videos to match the position of the new list of fresh videos.
 				This makes sure that we don't mark already watched videos as "new".
 			*/
 			
 			for (var i = 0; i < currentVideos.length; i++) {
-				console.log('CURR LOOP VID: ' + currentVideos[i]);
 				for (var k = 0; k < freshVideos.length; k++) {
-					console.log('CURR LOOP 2 VID: ' + freshVideos[k].title);
 					if (currentVideos[i] === freshVideos[k].title && i !== k) {
 						var temp = currentVideos[k];
 						currentVideos[k] = currentVideos[i];
@@ -362,10 +403,10 @@ DB_load(function() {
 			});
 			//save changes
 			DB_save(function() {
-				if (!markingVideoAsWatched) {
-					openTab(url);
+				if (!params.markingVideoAsWatched) {
+					openTab(url, params.rightClick);
 				} else {
-					self.fadeOut('fast');
+					self.parent().fadeOut('fast');
 				}
 			});
 		});
@@ -378,15 +419,17 @@ DB_load(function() {
 	 * @param {Number} i
 	 */
 	function activateSideBarVideos(_this, number) {
-		var self = $(_this),
-			title = self.find('.title:first').text(), //current title
-			url = self.find('a:first').attr('href'); //current url
+		var self = $(_this);
+		var title = self.find('.title:first').text(); //current title
+		var url = self.data("videourl"); //current url
+		
 		//we are dealing with new unwatched video
 		if (self.find('.newVid').length > 0) {
-			self.off('click').click(function(event, markingVideoAsWatched) {
+			self.off('click').click({markingVideoAsWatched: false, rightClick: false}, function(event, params) {
+				params = params || event.data; //defaults
 
-				var currentVideos = ExtensionData.accounts[selectedAccount].videoTitles,
-					freshVideos = document.getElementsByClassName('title');
+				var currentVideos = ExtensionData.accounts[selectedAccount].videoTitles;
+				var freshVideos = document.getElementsByClassName('title');
 				/*
 					Update current list of saved videos to match the position of the new list of fresh videos.
 					This makes sure that we don't mark already watched videos as "new".
@@ -434,17 +477,19 @@ DB_load(function() {
 				//save extensions data array
 				DB_save(function() {
 					if (!markingVideoAsWatched) {
-						openTab(url);
+						openTab(url, params.rightClick);
 					} else {
-						self.fadeOut('fast');
+						self.parent().fadeOut('fast');
 					}
 				});
 			});
 
 		} else {
-			self.off('click').click(function(event, markingVideoAsWatched) {
-				if (!markingVideoAsWatched) {
-					openTab(url);
+			self.off('click').click({markingVideoAsWatched: false, rightClick: false}, function(event, params) {
+				params = params || event.data; //defaults
+
+				if (!params.markingVideoAsWatched) {
+					openTab(url, params.rightClick);
 				} else {
 					alert(chrome.i18n.getMessage('contextMenuMsg'));
 				}
@@ -463,13 +508,13 @@ DB_load(function() {
 		account = (account === undefined ? selectedAccount : account);
 		var tit = ExtensionData.accounts[account].videoTitles,
 			newTxt = chrome.i18n.getMessage('newTxt');
-		console.log(tit)
+			
 		for (var i = 0; i < tit.length; i++) {
 			if (tit[i] === title) {
 				return bool ? false : '<span class="title">' + title + '</span>';
 			}
 		}
-		return bool ? true : '<span class="title">' + title + '</span> <span class="newVid">(' + newTxt + ')</span>';;
+		return bool ? true : '<span class="title">' + title + '</span> <span class="newVid">(' + newTxt + ')</span>';
 	}
 
 	/**
@@ -503,8 +548,14 @@ DB_load(function() {
 	 * opens a new tab
 	 * @param {String} url the url to open
 	 */
-	function openTab(url) {
-		if (ExtensionData.prefs['open_in_current_tab']) {
+	function openTab(url, rightClick) {
+
+		//if the user is opening the video using by rightclicking, we want to do the opposite of
+		//whatever setting they have for " Open videos in the current tab"
+
+		var openInNewTab = (rightClick ? ExtensionData.prefs['open_in_current_tab'] : !ExtensionData.prefs['open_in_current_tab']);
+
+		if (openInNewTab) {
 			chrome.tabs.query({
 				'active': true
 			}, function(tabs) {

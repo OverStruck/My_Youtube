@@ -7,28 +7,32 @@ for (var i = 0; i < objects.length; i++) {
 		objects[i].innerHTML = chrome.i18n.getMessage(objects[i].dataset.message);
 	}
 }
-$('#x').attr('href', '_locales/' + chrome.i18n.getMessage('lang') + '/history.html');
 $('#thx a').each(function (i) {
-	console.log(i)
 	$(this).attr('title', chrome.i18n.getMessage('thx'+i+'b'));
 });
 //load user settings
 DB_load(function() {
 	//dom elements
-	var fieldAdd = $('#add-field'),
-		btnAdd = $('#btn-add'),
-		btnSave = $('#btn-save'),
-		btnDel = $('#btn-del'),
-		btnClean = $('#btn-clean'),
-		res = $('#response'),
-		accountsTable = $('#youtubers');
+    var btnSave = $('#btn-save');
+    var btnDel = $('#btn-del');
+    var btnClean = $('#btn-clean');
+    var btnDwnSettings = $('#btn-downloadSettings');
+    var res = $('#response');
+    var accountsTable = $('#youtubers');
+    var modal = $('.modal:first');
+
+    iniFileLoader();
+
 	//click event listener
-	btnAdd.click(addYoutuber);
 	btnClean.click(function() {
-		ExtensionData.newVideosCache = []
+		ExtensionData.newVideosCache = [];
 		DB_save(function() {
 			err('errMsg8');
 		});
+		chrome.runtime.sendMessage({
+            msg: "refresh", 
+            ExtensionData: ExtensionData
+        });
 	});
 	btnSave.click(function() {
 		//save the preferences
@@ -50,9 +54,7 @@ DB_load(function() {
 				}
 			} else {
 				var interval = self.val();
-				if (interval === '' || isNaN(interval))
-					interval = 10;
-				else if (interval % 1 !== 0) {
+				if (interval === '' || isNaN(interval) || interval % 1 !== 0) {
 					interval = 10;
 					alert(chrome.i18n.getMessage('errMsg7'));
 				}
@@ -62,9 +64,14 @@ DB_load(function() {
 		});
 		DB_save(function() {
 			err('errMsg6');
-			btnSave.attr('style', '')
+			btnSave.attr('style', '');
 			btnSave.attr('disabled', true);
 		});
+
+		chrome.runtime.sendMessage({
+            msg: "refresh", 
+            ExtensionData: ExtensionData
+        });
 		return false;
 	});
 	btnDel.click(function() {
@@ -76,19 +83,17 @@ DB_load(function() {
 		activateSaveBtn();
 		return false;
 	});
-	fieldAdd.click(function() {
-		if (btnAdd.attr('disabled') === 'disabled') {
-			btnAdd.attr('disabled', false);
-			btnAdd.css('background-color', 'rgb(28, 62, 151)');
-		}
-		return false;
-	})
-	//"Enter" keypress event listener
-	fieldAdd.keypress(function(e) {
-		if (e.which == 13) {
-			addYoutuber();
-		}
-	});
+	btnDwnSettings.click(function() {
+        //clean cache - we only want the account info and not any videos loaded and stuff
+        ExtensionData.newVideosCache = [];
+        for (var i = ExtensionData.accounts.length - 1; i >= 0; i--) {
+            //ExtensionData.channels[i].videoTitles = [];
+            ExtensionData.accounts[i].newVideos = false;
+        }
+        saveSettings(JSON.stringify(ExtensionData));
+        return false;
+    });
+
 	//load settings
 	$('.pref').each(function(i) {
 		var self = $(this);
@@ -112,32 +117,24 @@ DB_load(function() {
 			self.focus(activateSaveBtn);
 		}
 	});
+	//percentage of space used
+    DB_usage();
 	//show youtubers
 	var length = ExtensionData.accounts.length;
-	(function showAccs(start, end) {
-		var stop = false;
-		if (start > length) {
-			start = start - length;
-			stop = true;
-		}
-		if (end > length) {
-			end = length - 1;
-			stop = true;
-		}
-		try {
-			var table = '<table cellpadding="3" cellspacing="1">';
-			for (var i = start; i <= end; i++) {
-				
-				table += '<tr id="' + i + '"><td>► <a href="' + ExtensionData.accounts[i].url + '" target="_blank">' +
-					ExtensionData.accounts[i].name + '</a></td></tr>';
-				
-			}
-			table += '</table>';
-			accountsTable.append(table);
-		} catch (e) {console.log(e.message)}
-		if (!stop)
-			showAccs(end + 1, end + 10);
-	})(0, 10);
+	var table = $('#youtubers table');
+    var columns = ['', '', ''];
+    var row = 0;
+
+    for (var j = 0; j < length; j++) {
+        columns[row] += '<tr id="' + j + '"><td>► <a href="' + ExtensionData.accounts[j].url +
+            '" target="_blank">' + ExtensionData.accounts[j].name + '</a></td></tr>';
+        row++;
+        if (row > 2)
+            row = 0;
+    }
+    table.eq(0).html(columns[0]);
+    table.eq(1).html(columns[1]);
+    table.eq(2).html(columns[2]);
 
 	//highlight youtubers when clicked
 	accountsTable.find('tr').click(activateTR);
@@ -159,96 +156,103 @@ DB_load(function() {
 		return false;
 	}
 
-	function addYoutuber() {
-		var account = fieldAdd.val().trim();
-		if (account === '') {
-			err('errMsg1');
-			return false;
-		}
-		testYoutuber(account)
-			.done(function(response) {
-			account = response.entry.author[0];
-			//check if account exists
-			if (accountExits(account.name.$t)) {
-				err('errMsg2');
-				return false;
-			}
-			var url = response.entry.link[0].href;
-			getYoutuber(account.yt$userId.$t).done(function(response2) {
-				//show accounts in page
-				$('#youtubers table').last().append('<tr><td>► <a target="_blank" href="' + url + '">' +
-					account.name.$t + '</a></td></tr>').find('tr').last().click(activateTR);
-				//update extension data
-				ExtensionData.accounts.push({
-					'id': account.yt$userId.$t,
-					'name': account.name.$t,
-					'thumbnail': response.entry.media$thumbnail.url,
-					'videoTitles': getVideoTitles(response2),
-					'newVideos': false,
-					'url': url
-				});
-				fieldAdd.val('');
-				if (res.text() !== chrome.i18n.getMessage('errMsg4'))
-					res.fadeOut('fast');
-
-				activateSaveBtn();
-			});
-		})
-			.fail(function() {
-			err('errMsg3');
-		});
-		return false;
-	}
-
-	function accountExits(account) {
-		for (var i = 0; i < ExtensionData.accounts.length; i++) {
-			if (ExtensionData.accounts[i].name === account) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	function err(msg) {
 		res.text(chrome.i18n.getMessage(msg)).fadeOut('fast').fadeIn('fast');
 	}
 
-	function getVideoTitles(data) {
-		var entries = data.feed.entry,
-			result = [];
-		if (entries === undefined) {
-			err('errMsg4');
-			return result;
-		}
-		//loop through result to get data
-		for (var i = 0; i < entries.length; i++) {
-			result.push(entries[i].title.$t);
-		}
-		return result;
-	}
+	 //save extension settings
+    function saveSettings(data) {
+        var today = (function() {
+            var today = new Date();
+            var dd = today.getDate(); //day
+            var mm = today.getMonth() + 1; //month
+            var yyyy = today.getFullYear(); //year
 
-	function testYoutuber(account) {
-		return $.ajax({
-			url: 'https://gdata.youtube.com/feeds/api/users/' + account,
-			dataType: 'json',
-			data: {
-				v: 2,
-				alt: 'json'
-			}
-		});
-	}
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            today = mm + '/' + dd + '/' + yyyy;
+            return today;
+        })();
+        var blob = new Blob([
+            "──────────────────────────────────────────────────────────────────────\n\n",
+            "My Youtube for Google Chrome " + chrome.app.getDetails().version + "\n\n",
+            "THIS FILE CONTAINS YOUR MY-YOTUBE SETTINGS\n",
+            "THIS INFORMATION IS NOT ENCRYPTED, IT CAN BE EASILY READ\n",
+            "SAVE IT IN A SAFE PLACE OR DELETE IT WHEN NO LONGER NEEDED\n\n",
+            "Date generated: " + today + "\n",
+            "──────────────────────────────────────────────────────────────────────\n\n",
+            //'<MyYoutube key="' + (!config.user_config.in_key ? 'ASK' : psw) + '">',
+            '<MyYoutube>',
+            //Tea.encrypt(data, psw),
+            utf8_to_b64(data),
+            "</MyYoutube>"
+        ], {
+            type: "text/plain;charset=utf-8"
+        });
 
-	function getYoutuber(account) {
-		return $.ajax({
-			url: 'https://gdata.youtube.com/feeds/api/users/' + account + '/uploads',
-			dataType: 'json',
-			cache: false,
-			data: {
-				v: 2,
-				alt: 'json',
-				'start-index': 1,
-				'max-results': 4
-			}
-		});
-	}
+        saveAs(blob, "MyYoutube.GoogleChrome.settings");
+    }
+
+    function iniFileLoader() {
+        document.getElementById('upConfig').addEventListener('change', function(event) {
+            var files = event.target.files; //FileList object
+            var file;
+            for (var i = 0; i < files.length; i++) {
+                file = files[i];
+                //we try to filter random files
+                if (escape(file.name).indexOf('.settings') === -1) {
+                    window.alert('Archivo invalido');
+                    continue;
+                }
+            }
+            var reader = new FileReader();
+            reader.addEventListener('load', function(event) {
+                var settings = event.target.result;
+                var data = settings.match(/<MyYoutube>(.*?)<\/MyYoutube>/);
+                if (data === null) {
+                    window.console.error('Match parse failed');
+                    window.alert('Archivo corrupto\n\n¿Que has hecho?');
+                    return false;
+                }
+                settings = data[1];
+                settings = b64_to_utf8(settings);
+                try {
+                    settings = JSON.parse(settings);
+                } catch (e) {
+                    window.console.error('JSON parse failed');
+                    window.console.error(e.message);
+                    window.alert('Archivo corrupto\n\n¿Que has hecho?');
+                    return false;
+                }
+                ExtensionData = settings;
+                chrome.runtime.sendMessage({
+            		msg: "refresh", 
+            		ExtensionData: ExtensionData
+        		});
+                DB_save(function() {
+                    window.location.reload();
+                });
+            });
+            //Read the text file
+            reader.readAsText(file);
+        });
+    }
+
+    /*
+        In most browsers, calling window.btoa() on a Unicode string will cause a Character Out Of Range exception
+        see: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/btoa
+    */
+
+    function utf8_to_b64(str) {
+        return window.btoa(unescape(encodeURIComponent(str)));
+    }
+
+    function b64_to_utf8(str) {
+        return decodeURIComponent(escape(window.atob(str)));
+    }
+
 });

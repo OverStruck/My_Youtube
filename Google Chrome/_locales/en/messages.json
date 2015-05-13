@@ -42,7 +42,7 @@
       "message": "NEW"
    },
    "notificationText": {
-      "message": "\u003Cb\u003E$VIDEOS$\u003C/b\u003E new video$S$ $HAS$ been uploaded!",
+      "message": "$VIDEOS$ new video$S$ $HAS$ been uploaded!",
       "placeholders": {
          "has": {
             "content": "$3",
@@ -80,7 +80,7 @@
       "message": "Load settings"
    },
    "opts6": {
-      "message": "Space used"
+      "message": "Space used:"
    },
    "optsFooter": {
       "message": "What's new?"
@@ -103,7 +103,7 @@
    "optsbtn4": {
       "message": "Clean cache"
    },
-   "optsbtn4": {
+   "optsbtn5": {
       "message": "Download settings"
    },
    "popupE1_B": {

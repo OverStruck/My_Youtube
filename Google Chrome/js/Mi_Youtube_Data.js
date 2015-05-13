@@ -46,21 +46,20 @@ function DB_usage() {
 }
 
 function DB_load(callback) {
+	var upgrade = false;
     chrome.storage.local.get(ExtensionDataName, function(r) {
         if (isEmpty(r[ExtensionDataName])) {
             DB_setValue(ExtensionDataName, ExtensionData, callback);
         } else if (r[ExtensionDataName].dataVersion != ExtensionData.dataVersion) {
-            //update defaults values without losing already existing data to V2.1
-            if (r[ExtensionDataName].newVideosCache === undefined) {
-                r[ExtensionDataName].newVideosCache = [];
-            }
-            r[ExtensionDataName].dataVersion = ExtensionData.dataVersion;
-            ExtensionData = r[ExtensionDataName];
+            upgrade = true;
+			r[ExtensionDataName].isNewInstall = false;
+			r[ExtensionData].newVideosCache = [];
+			r[ExtensionDataName].accounts[0] = ExtensionData.accounts[0];
             DB_setValue(ExtensionDataName, ExtensionData, callback);
         } else {
             ExtensionData = r[ExtensionDataName];
-            callback();
         }
+        callback(upgrade);
     });
 }
 

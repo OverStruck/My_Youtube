@@ -10,6 +10,8 @@ for (var i = 0; i < objects.length; i++) {
 $('#thx a').each(function (i) {
 	$(this).attr('title', chrome.i18n.getMessage('thx'+i+'b'));
 });
+$("#logo").css("background-image", "url('./_locales/" + chrome.i18n.getMessage('lang') + "/logo.png')");
+
 //load user settings
 DB_load(function() {
 	//dom elements

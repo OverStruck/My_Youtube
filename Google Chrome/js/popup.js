@@ -19,9 +19,6 @@ DB_load(function() {
 		$('#novids').show();
 	}
 
-	//add listener to context menu
-	chrome.contextMenus.onClicked.addListener(markVideoAsWatched);
-
 	var selectedAccount, //used to keep track of the selected account
 		vidContainer = $('#videos'), //div containing videos
 		userData = $('#user_data'), //span containing some info about the Youtube account selected, such as username
@@ -281,18 +278,6 @@ DB_load(function() {
 	}
 
 	/**
-	 * Main function when marking videos as watched
-	 * Basically it just triggers the click event which updates everything
-	 * We pass an extra parameter to prevent going to the video url
-	 */
-	function markVideoAsWatched() {
-		var elem = $(clickedEl).parent().parent();
-		elem.trigger('click', {
-			markingVideoAsWatched: true
-		});
-	}
-
-	/**
 	 * Generates the neccesary HTML displaying the account's videos
 	 * @param {Array} videos an array containing objects with each videos' meta-data
 	 * @param {Number} onlyNew The account index in the channels array
@@ -343,9 +328,6 @@ DB_load(function() {
 	 */
 	function activateVideos() {
 		$('.vid').each(function(i) {
-			$(this).bind("contextmenu", function(event) {
-				return false;
-			});
 			//if user is viewing a particular account, we use a particular algorith
 			if (selectedAccount !== undefined) {
 				activateSideBarVideos(this, i);
@@ -408,6 +390,16 @@ DB_load(function() {
 				} else {
 					self.parent().fadeOut('fast');
 				}
+			});
+		});
+
+		//mark as watched
+		$('button.details').each(function() {
+			$(this).off('click').click(function(e) {
+				triggerClick(e.target, {
+					markingVideoAsWatched: true,
+					rightClick: false
+				});
 			});
 		});
 	}
@@ -476,7 +468,7 @@ DB_load(function() {
 
 				//save extensions data array
 				DB_save(function() {
-					if (!markingVideoAsWatched) {
+					if (!params.markingVideoAsWatched) {
 						openTab(url, params.rightClick);
 					} else {
 						self.parent().fadeOut('fast');

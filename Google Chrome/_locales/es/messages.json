@@ -42,7 +42,7 @@
       "message": "NUEVO"
    },
    "notificationText": {
-      "message": "\u00A1Hay \u003Cb\u003E$VIDEOS$\u003C/b\u003E nuevo$S$ video$S$!",
+      "message": "Hay $VIDEOS$ nuevo$S$ video$S$!",
       "placeholders": {
          "s": {
             "content": "$2",

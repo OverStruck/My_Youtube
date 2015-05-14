@@ -42,7 +42,7 @@
       "message": "NUEVO"
    },
    "notificationText": {
-      "message": "\u00A1Hay \u003Cb\u003E$VIDEOS$\u003C/b\u003E nuevo$S$ video$S$!",
+      "message": "Hay $VIDEOS$ nuevo$S$ video$S$!",
       "placeholders": {
          "s": {
             "content": "$2",
@@ -73,7 +73,10 @@
       "message": "minuto(s)"
    },
    "opts5": {
-      "message": "Abrir videos en la pestaña actual"
+      "message": "Cargar onfiguración"
+   },
+   "opts6": {
+      "message": "Espacio usado"
    },
    "optsHeader1": {
       "message": "Youtuberos que sigues:"
@@ -89,6 +92,9 @@
    },
    "optsbtn4": {
       "message": "Limpiar caché"
+   },
+   "optsbtn5": {
+      "message": "Descargar onfiguración"
    },
    "optsFooter": {
       "message": "¿Que hay de nuevo?"
@@ -156,7 +162,22 @@
    "contextMenu": {
       "message": "Marcar video como visto"
    },
+   "uploadedBy": {
+      "message": "Subido por:"
+   },
    "contextMenuMsg": {
       "message": "Ya has visto este video .-."
+   },
+   "YtModBtnAddTxt": {
+      "message": "Agregar a Mi YouTube™"
+   },
+   "YtModBtnAddedTxt": {
+      "message": "Youtuber agregado a Mi YouTube™"
+   },
+   "YtModBtnAddingTxt": {
+      "message": "Agregando Youtuber"
+   },
+   "YtModErrMsg": {
+      "message": "No se puede agregar a este Youtuber en estos momentos\n\nIntentalo después"
    }
 }

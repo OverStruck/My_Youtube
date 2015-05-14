@@ -1,0 +1,166 @@
+{
+   "errMsg1": {
+      "message": "You have to write something..."
+   },
+   "errMsg2": {
+      "message": "That Youtuber is already in your list..."
+   },
+   "errMsg3": {
+      "message": "Invalid account..."
+   },
+   "errMsg4": {
+      "message": "That Youtuber has no videos..."
+   },
+   "errMsg5": {
+      "message": "An unknown error has happened..."
+   },
+   "errMsg6": {
+      "message": "Your changes have been successfully saved"
+   },
+   "errMsg7": {
+      "message": "You can't put decimals in option #3\n\nThe default value of 10 was saved"
+   },
+   "errMsg8": {
+      "message": "Cache deleted"
+   },
+   "extDescription": {
+      "description": "The extension description",
+      "message": "Never miss another video of your favorite Youtubers"
+   },
+   "extName": {
+      "description": "The extension name",
+      "message": "My Youtube\u2122"
+   },
+   "extPopupTooltip": {
+      "description": "The tooltip title of the popup",
+      "message": "My Youtube"
+   },
+   "lang": {
+      "message": "en"
+   },
+   "newTxt": {
+      "message": "NEW"
+   },
+   "notificationText": {
+      "message": "\u003Cb\u003E$VIDEOS$\u003C/b\u003E new video$S$ $HAS$ been uploaded!",
+      "placeholders": {
+         "has": {
+            "content": "$3",
+            "example": "This can be either HAS or HAVE"
+         },
+         "s": {
+            "content": "$2",
+            "example": "this can be either video or videoS. Notice the S"
+         },
+         "videos": {
+            "content": "$1",
+            "example": "5"
+         }
+      }
+   },
+   "optionsHeaderTitle": {
+      "message": "My Youtube Options"
+   },
+   "opts1": {
+      "message": "Add Youtuber"
+   },
+   "opts2": {
+      "message": "Show notification"
+   },
+   "opts3": {
+      "message": "Play alarm sound when new videos are found"
+   },
+   "opts4": {
+      "message": "Check for new videos every"
+   },
+   "opts4b": {
+      "message": "minute(s)"
+   },
+   "opts5": {
+      "message": "Open videos in the current tab"
+   },
+   "optsFooter": {
+      "message": "What's new?"
+   },
+   "optsFooter2": {
+      "message": "Options"
+   },
+   "optsHeader1": {
+      "message": "Youtubers you're following:"
+   },
+   "optsbtn1": {
+      "message": "Add"
+   },
+   "optsbtn2": {
+      "message": "Save changes"
+   },
+   "optsbtn3": {
+      "message": "Delete"
+   },
+   "optsbtn4": {
+      "message": "Clean cache"
+   },
+   "popupE1_B": {
+      "message": "This account has no videos"
+   },
+   "popupE1_H": {
+      "message": "An unknown error has happened"
+   },
+   "popupE2_B": {
+      "message": "This error shouldn't happen. Possible reasons why it happened include:\u003Cbr\u003E\u003Cul\u003E\u003Cli\u003ESome Youtube services are down\u003C/li\u003E\u003Cli\u003EYou don't have an active Internet connection\u003C/li\u003E\u003C/ul\u003ETry loading other account, if this error continues for more than 24 hours, \u003Ca target='_blank' href='http://www.juanix.net'\u003Ehit me up\u003C/a\u003E"
+   },
+   "popupE2_H": {
+      "message": "Could not load any videos"
+   },
+   "popupE3_B": {
+      "message": "You can still watch videos by clicking on any account on right hand side"
+   },
+   "popupE3_H": {
+      "message": "There are no new videos :("
+   },
+   "popuph2": {
+      "message": "New Videos"
+   },
+   "popupMsg1": {
+      "message": "Checking videos from: "
+   },
+   "popup_tooltip": {
+      "message": "Video uploaded by $NAME$",
+      "placeholders": {
+         "name": {
+            "content": "$1",
+            "example": "PMVTutoriales"
+         }
+      }
+   },
+   "thx1": {
+      "message": "Thanks for using My YouTube\u2122!"
+   },
+   "thx2": {
+      "message": "Don't forget to..."
+   },
+   "thx3": {
+      "message": "Rate 5 starts"
+   },
+   "thx4": {
+      "message": "Subscribe"
+   },
+   "thx5": {
+      "message": "Like & Follow"
+   },
+   "thx0b": {
+      "message": "On the Apps Gallery"
+   },
+   "thx1b": {
+      "message": "To my Youtube Channel (it's in Spanish :/)"
+   },
+   "thx2b": {
+      "message": "Share this extension with your friends on Facebook :)"
+   },
+    "contextMenu": {
+      "message": "Mark video as watched"
+   },
+   "contextMenuMsg": {
+      "message": "You've already watched this video .-."
+   }
+}

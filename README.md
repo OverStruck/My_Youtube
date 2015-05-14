@@ -15,9 +15,6 @@ Youtubers have uploaded new videos.
 
 *Any feedback is appreciated. If you have any suggestions to improve this extension, don't hesitate to let me know.*
 
-###What's happening now?
-Version 1.3 is on the making, it'll add a couple of new features along with a version for Firefox<br>
-
 #Mi Youtube™
 Mi Youtube ™ es ​​una extensión orientada a ávidos Youtubers. Actúa como un notificador dandote a saber cuando tus youtubers favoritos han subido nuevos videos.
 
@@ -33,7 +30,4 @@ Mi Youtube ™ es ​​una extensión orientada a ávidos Youtubers. Actúa com
 **popup.html** - El punto HTML de entrada para la ventana emergente de la extensión (se abre cuando se hace clic en el icono de la extension)<br>
 
 *Cualquier comentario es apreciado. Si usted tiene alguna sugerencia para mejorar esta extensión, no dude en hacérmelo saber.*
-
-###¿Qué está ocurriendo ahora?
-La versión 1.3 está en desarollo, se agregaran un par de nuevas características, junto con una versión para Firefox
 

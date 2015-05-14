@@ -13,34 +13,41 @@ tmr.setTimeout(function() {
     var DATA = new DATABASE.MY_YOUTUBE_DATA(SS.storage);
     //we want the user's FF version for version-dependent features
     var FF_VERSION = parseInt(require("sdk/system").version);
+	
     //todo - inform user he's using too much info
     //SS.on("OverQuota", function() {
     //window.alert('Storage limit exceeded');
     //});
 
-    DATA.load(function(ExtensionData) {
-        //---------required modules & setup -------------------------------
-        //var {ActionButton} = require("sdk/ui/button/action"); //button ui
-        var {
-            ToggleButton
-        } = require('sdk/ui/button/toggle');
-        var {
-            Panel
-        } = require("sdk/panel"); //panel (for main popup)
+//---------required modules & setup -------------------------------
+
+        var {ToggleButton} = require('sdk/ui/button/toggle');
+        var {Panel} = require("sdk/panel"); //panel (for main popup)
         var Request = require("sdk/request").Request; //network requests
         var tabs = require("sdk/tabs");
         var translate = require("sdk/l10n").get;
         var notifications = require("sdk/notifications");
         var pageMod = require("sdk/page-mod"); //needed to add contentscripts
         var self = require("sdk/self");
-
         var optionsURL = "options.html";
+        var upgradeURL = "upgrade.html";
+
+    DATA.load( function(ExtensionData, upgrade) {
+        if (upgrade) {
+            upgradeInit(ExtensionData);
+        }
+        else {
+            init(ExtensionData);
+        }
+    
+
+    function init(ExtensionData) {
 
         //first install
         if (ExtensionData.isNewInstall) {
-            getYoutuber("ZgwLCu6tSLEUJ30METhJHg", function(response) {
-                response = response.json;
-                ExtensionData.channels[0].videoTitles = getVideoTitles(response.feed);
+            getYoutuber("UUZgwLCu6tSLEUJ30METhJHg", function(response) {
+                response = response.json.items;
+                ExtensionData.channels[0].videoTitles = getVideoTitles(response);
                 ExtensionData.isNewInstall = false;
                 DATA.save(ExtensionData);
                 openOptions();
@@ -89,8 +96,18 @@ tmr.setTimeout(function() {
                 }
             }
         });
-
+        
         //youtube.com contentscript
+        pageMod.PageMod({
+        	include: [
+        		"https://www.youtube.com/*",
+                "http://www.youtube.com/*",
+        	],
+        	contentScriptWhen: 'end',
+        	contentScriptFile: self.data.url("js/YouTube_Disable_Red_Bar_aka_SPF.js"),
+        	attachTo: 'top'
+        });
+        
         pageMod.PageMod({
             include: [
                 "https://www.youtube.com/watch?v=*",
@@ -100,8 +117,8 @@ tmr.setTimeout(function() {
                 "https://www.youtube.com/channel/*",
                 "http://www.youtube.com/channel/*"
             ],
-            contentScriptWhen: 'ready',
-            contentScriptFile: self.data.url("js/youtubeMod.js"),
+            contentScriptWhen: 'end',
+            contentScriptFile: self.data.url("js/myYoutubeMod.js"),
             contentStyleFile: self.data.url("css/youtubeMod.css"),
             contentScriptOptions: {
                 btnAddTxt: translate('YtModBtnAddTxt'),
@@ -111,28 +128,28 @@ tmr.setTimeout(function() {
             },
             attachTo: 'top',
             onAttach: function onAttach(worker) {
-                //console.log('A---->:    ' + JSON.stringify(ExtensionData.channels, null, 4))
+
                 worker.port.on('loadData', function() {
                     worker.port.emit("channels", ExtensionData.channels);
                 });
                 worker.port.on("addYoutuber", function(userName) {
-                    /*sadly, we have to make 2 network requests
+                /*sadly, we have to make 2 network requests
                 one to get the channel thumbnail
                 and the second one to get the videos because youtube*/
                     getYoutuber(userName, function(res) {
                         if (res.statusText === "OK") {
-                            res = res.json;
-                            getYoutuber(userName, function(response) {
+                            channel = res.json.items[0];
+                            var uploadsPlayListId = channel.contentDetails.relatedPlaylists.uploads;
+                            getYoutuber(uploadsPlayListId, function(response) {
                                 if (response.statusText === "OK") {
-                                    response = response.json;
-                                    var youtuber = response.feed;
                                     ExtensionData.channels.push({
-                                        'id': res.entry.author[0].yt$userId.$t,
-                                        'name': youtuber.author[0].name.$t,
-                                        'thumbnail': res.entry.media$thumbnail.url,
-                                        'videoTitles': getVideoTitles(youtuber),
+                                        'id': channel.id,
+                                        'name': channel.snippet.title,
+                                        'thumbnail': channel.snippet.thumbnails.default.url,
+                                        'videoTitles': getVideoTitles(response.json.items),
                                         'newVideos': false,
-                                        'url': res.entry.link[0].href
+                                        'url': 'https://www.youtube.com/channel/' + channel.id,
+                                        'uploadsPlayListId': uploadsPlayListId
                                     });
                                     DATA.save(ExtensionData);
                                     worker.port.emit("done", {
@@ -208,7 +225,6 @@ tmr.setTimeout(function() {
         }
 
         //-------------check videos-----------------------------------
-
         var totalNewVideos = 0;
         var newVideosHash = '';
         var oldVideosHash = '';
@@ -221,159 +237,161 @@ tmr.setTimeout(function() {
         function checkNewVideos(count) {
             //we need to get the lastest data
             var account = ExtensionData.channels[count];
-            getYoutuber(account.id, function(response) {
-                response = response.json;
-                var newVideosCount = compareVideos(getVideoTitles(response.feed), account.videoTitles);
-                var save = false;
-                //if newVideosCount > 0, add the number to the total newVideos number
-                if (newVideosCount) {
-                    ExtensionData.channels[count].newVideos = true;
-                    totalNewVideos += newVideosCount;
-                    newVideosHash += account.name + totalNewVideos;
+            getYoutuber(account.uploadsPlayListId, function(response) {
+            	if (response.statusText === "OK") {
+	                response = response.json;
+	                var newVideosCount = compareVideos(getVideoTitles(response.items), account.videoTitles);
+	                var save = false;
+	                //if newVideosCount > 0, add the number to the total newVideos number
+	                if (newVideosCount) {
+	                    ExtensionData.channels[count].newVideos = true;
+	                    totalNewVideos += newVideosCount;
+	                    newVideosHash += account.name + totalNewVideos;
 
-                    /*
-                this is probably quite messy
-                basically, instead of just counting how many new videos we have
-                we want to SAVE those new videos, that way, when the popup shows
-                we already have the new videos saved and thus, there's no need to connect
-                to youtube to fetch those videos (otherwise we are connecting twice for no good reason)
+	                 /*
+	                this is probably quite messy
+	                basically, instead of just counting how many new videos we have
+	                we want to SAVE those new videos, that way, when the popup shows
+	                we already have the new videos saved and thus, there's no need to connect
+	                to youtube to fetch those videos (otherwise we are connecting twice for no good reason)
 
-                this of course, needs to be re-factored since we are doing kind of the same thing in popup.js
-                */
-                    var videos = proccessYoutubeFeed(response.feed);
-                    var _account = {
-                        "accountName": ExtensionData.channels[count].name,
-                        "accountIndex": count,
-                        "videos": []
-                    };
+	                this of course, needs to be re-factored since we are doing kind of the same thing in popup.js
+	                */
+	                    var videos = proccessYoutubeFeed(response.items);
+	                    var _account = {
+	                        "accountName": ExtensionData.channels[count].name,
+	                        "accountIndex": count,
+	                        "videos": []
+	                    };
 
-                    for (var j = 0; j < videos.length; j++) {
-                        var isNew = isNewVideo(videos[j].title, count);
-                        if (isNew) {
-                            save = true;
-                            videos[j].isNew = true;
-                            videos[j].videoIndex = j;
-                            videos[j].cacheIndex = currentAccount;
-                        } else {
-                            videos[j].isNew = false;
-                        }
+	                    for (var j = 0; j < videos.length; j++) {
+	                        var isNew = isNewVideo(videos[j].title, count);
+	                        if (isNew) {
+	                            save = true;
+	                            videos[j].isNew = true;
+	                            videos[j].videoIndex = j;
+	                            videos[j].cacheIndex = currentAccount;
+	                        } else {
+	                            videos[j].isNew = false;
+	                        }
 
-                        _account.videos.push(videos[j]);
-                    }
+	                        _account.videos.push(videos[j]);
+	                    }
 
-                    if (save) {
-                        currentAccount++;
-                        newVideos.push(_account);
-                    }
+	                    if (save) {
+	                        currentAccount++;
+	                        newVideos.push(_account);
+	                    }
 
-                } else {
-                    ExtensionData.channels[count].newVideos = false;
-                }
-                //stop recursive function if count > the number of total channels saved
-                if (count < ExtensionData.channels.length - 1) {
-                    //DATA.save(ExtensionData);
-                    checkNewVideos(++count);
-                } else {
-                    //show popup letting user know of new videos
-                    if ((totalNewVideos > 0) && (oldVideosHash !== newVideosHash)) {
-                        if (FF_VERSION >= 36) {
-                            mainBtn.badge = totalNewVideos;
-                        } else {
-                            mainBtn.icon = "./icons/badges/" + (totalNewVideos > 9 ? 10 : totalNewVideos) + ".png";
-                        }
+	                } else {
+	                    ExtensionData.channels[count].newVideos = false;
+	                }
+	                //stop recursive function if count > the number of total channels saved
+	                if (count < ExtensionData.channels.length - 1) {
+	                    //DATA.save(ExtensionData);
+	                    checkNewVideos(++count);
+	                } else {
+	                    //show popup letting user know of new videos
+	                    if ((totalNewVideos > 0) && (oldVideosHash !== newVideosHash)) {
+	                        if (FF_VERSION >= 36) {
+	                            mainBtn.badge = totalNewVideos;
+	                        } else {
+	                            mainBtn.icon = "./icons/badges/" + (totalNewVideos > 9 ? 10 : totalNewVideos) + ".png";
+	                        }
 
-                        //ExtensionData.cache = []; //clean cache
-                        ExtensionData.cache = newVideos; //THIS WE WANT! - save new videos found
-                        oldVideosHash = newVideosHash;
+	                        //ExtensionData.cache = []; //clean cache
+	                        ExtensionData.cache = newVideos; //THIS WE WANT! - save new videos found
+	                        oldVideosHash = newVideosHash;
 
-                        if (ExtensionData.prefs['show_popup'])
-                            notify(totalNewVideos);
+	                        if (ExtensionData.prefs['show_popup'])
+	                            notify(totalNewVideos);
 
-                        if (ExtensionData.prefs['play_popup_sound'])
-                            alarm.port.emit('playAlarm');
-                    }
-                    //reset
-                    newVideos = [];
-                    newVideosHash = '';
-                    totalNewVideos = 0;
-                    currentAccount = 0;
-                    //check for new videos every X minutes
-                    DATA.save(ExtensionData);
-                    tmr.setTimeout(function() {
-                        checkNewVideos(currentAccount);
-                    }, ExtensionData.prefs['check_interval']);
-                }
+	                        if (ExtensionData.prefs['play_popup_sound'])
+	                            alarm.port.emit('playAlarm');
+	                    }
+	                    //reset
+	                    newVideos = [];
+	                    newVideosHash = '';
+	                    totalNewVideos = 0;
+	                    currentAccount = 0;
+	                    //check for new videos every X minutes
+	                    DATA.save(ExtensionData);
+	                    tmr.setTimeout(function() {
+	                        checkNewVideos(currentAccount);
+	                    }, ExtensionData.prefs['check_interval']);
+                	}
+            	} else if(response.status !== 404) {
+            		//reset
+	                newVideos = [];
+					newVideosHash = '';
+					totalNewVideos = 0;
+					currentAccount = 0;
+	                    //check for new videos every X minutes
+					DATA.save(ExtensionData);
+					tmr.setTimeout(function() {
+						checkNewVideos(currentAccount);
+					}, ExtensionData.prefs['check_interval']);
+
+					console.error('My Youtube New Videos Check error: ' + response.statusText);
+            	}
             }, true);
         }
 
-        function getYoutuber(account, callback, getVideos) {
-            var url = 'http://gdata.youtube.com/feeds/api/users/' + account;
-            var params = {
-                "v": 2,
-                "alt": 'json'
-            };
-            //extra parameters needed to get account videos
-            if (getVideos) {
-                url += '/uploads';
-                params['start-index'] = 1;
-                params['max-results'] = 4;
-            }
-
-            Request({
-                url: url,
-                headers: {
-                    'Cache-control': 'no-cache'
-                },
-                content: params,
-                onComplete: function(response) {
-                    callback(response);
-                },
-            }).get();
-        }
-
+        //@param Array data
         function getVideoTitles(data) {
-            var entries = data.entry,
-                result = [];
-            if (entries === undefined) {
-                return result;
-            }
-            //loop through result to get data
-            for (var i = 0; i < entries.length; i++) {
-                result.push(entries[i].title.$t);
+            var result = [];
+            var snippets;
+
+            for (var i = 0; i < data.length; i++) {
+                snippets = data[i];
+                for (var key in snippets) {
+                    if (snippets.hasOwnProperty(key)) {
+                        var snippet = snippets[key];
+                        if (snippet.title !== undefined) {
+                             result.push(snippet.title);   
+                        }
+                    }
+                }
+
             }
             return result;
         }
 
         function proccessYoutubeFeed(data) {
-            var feed = data.entry;
             var videos = [];
-            if (feed === undefined) {
+            if (data === undefined) {
                 //error this account has no videos
                 return false;
             }
-            for (var i = 0; i < feed.length; i++) {
-                var entry = feed[i];
-                var title = entry.title.$t; //Video title
-                var link = entry.link[0].href; //Video link
-                var img = entry.media$group.media$thumbnail[1].url; //video thumbnail
-                var description = entry.media$group.media$description.$t; //video description
-                var author = entry.author[0].name.$t; //creato's Youtube name
 
-                videos.push({
-                    "id": i, //the video number (0 -> 3)
-                    "title": title,
-                    "url": link,
-                    "thumbnail": img,
-                    "description": description,
-                    "author": author
-                });
+            var snippets;
+            var youtubeVideoUrl = 'https://www.youtube.com/watch?v=';
+
+            for (var i = 0; i < data.length; i++) {
+
+                snippets = data[i];
+                for (var key in snippets) {
+                    if (snippets.hasOwnProperty(key)) {
+                        var snippet = snippets[key];
+
+                        videos.push({
+                            "id": i, //the video number (0 -> 3)
+                            "title": snippet.title,
+                            "url": youtubeVideoUrl + snippet.resourceId.videoId,
+                            "thumbnail": snippet.thumbnails.medium.url,
+                            "description": snippet.description,
+                            "author": snippet.channelTitle
+                        });
+                    }
+                }
+
             }
             return videos;
         }
 
         function compareVideos(a, b) {
-            var length = a.length,
-                diff = 0;
+            var length = a.length;
+            var diff = 0;
             for (var i = 0; i < length; i++) {
                 var add = 1;
                 for (var j = 0; j < length; j++) {
@@ -509,6 +527,85 @@ tmr.setTimeout(function() {
             return true;
         }
 
-    });
+    }
+
+    function upgradeInit(ExtensionData) {
+
+        var channel;
+        var name;
+        var id;
+        /*
+        Due to the changes in Youtube's API V3, we need to update our channels array and objects
+        to include a new property "uploadsPlayListId" because we need that ID to retreive videos 
+        with the new API
+
+        So here we have to connect to Youtube to get this ID and update existing channels*/
+        (function upgradeChannels(iii) {
+            id = ExtensionData.channels[iii].id;
+            name = ExtensionData.channels[iii].name;
+
+            id = (iii > 0) ? 'UC' + id : id; //we need to add 'UC' to our old channel ids except for the first channel
+
+            getYoutuber(id, function(response) {
+                if (response.statusText === "OK") {
+                    channel = response.json.items[0];
+                    ExtensionData.channels[iii].uploadsPlayListId = channel.contentDetails.relatedPlaylists.uploads;
+                    ExtensionData.channels[iii].id = id;
+                } else {
+                    ExtensionData.channels[iii].uploadsPlayListId = null;
+                    ExtensionData.channels[iii].id = id;
+                    console.error('No uploads playlist id found');
+                }
+
+                if (iii < ExtensionData.channels.length - 1) {
+                        return upgradeChannels(++iii);
+                } else {
+                    DATA.save(ExtensionData);
+                    init(ExtensionData);
+                    return true;
+                }
+
+            }, false);
+        })(0);
+
+    }
+
+     /*
+        @param string account - the account id OR playlist id #confusing?
+        @param function callback the callback function
+        @param bool getVideos - get or not video data
+    */
+    function getYoutuber(account, callback, getVideos) {
+            //var url = 'http://gdata.youtube.com/feeds/api/users/' + account;
+            var url = 'https://www.googleapis.com/youtube/v3/';
+            var params = {
+                'part': 'snippet',
+                'key': 'AIzaSyBbTkdQ5Pl_tszqJqdafAqF0mVWWngv9HU',
+            };
+            //extra parameters needed to get account videos
+            if (getVideos) {
+                url += 'playlistItems';
+                params.maxResults = 4;
+                params.playlistId = account;
+                params.fields = 'items(snippet,status)';
+            } else {
+                params.id = account;
+                params.part += ',contentDetails';
+                url += 'channels';
+            }
+            
+            Request({
+                url: url,
+                headers: {
+                    'Cache-control': 'no-cache'
+                },
+                content: params,
+                onComplete: function(response) {
+                    callback(response);
+                },
+            }).get();
+    }
+
+} );
 
 }, 1000);

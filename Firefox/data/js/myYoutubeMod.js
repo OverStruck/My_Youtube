@@ -13,13 +13,18 @@ self.port.once("channels", function(channels) {
         userName = document.getElementsByClassName('yt-user-info')[0];
         userName = userName.getElementsByTagName('a')[0];
         userName = userName.getAttribute('data-ytid');
-        userName = userName.substring(2).trim();
+        userName = userName.trim();
     } else {
         onWatchPage = false;
         userName = document.getElementsByClassName('yt-uix-subscription-button')[0];
         userName = userName.getAttribute('data-channel-external-id');
-        userName = userName.substring(2).trim();
+        userName = userName.trim();
     }
+    if (userName === null || userName === undefined) {
+        console.log("My Youtube Mod Error: Could not find username");
+        return;
+    }
+
     for (var i = channels.length - 1; i >= 0; i--) {
         if (userName === channels[i].id) {
             isNewYoutuber = false;

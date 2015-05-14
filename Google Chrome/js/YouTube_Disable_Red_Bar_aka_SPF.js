@@ -17,5 +17,5 @@
 //Adapted for this extension by Overstruck (github.com/OverStruck)
 
 var script = document.createElement("script");
-script.innerHTML = '!function(){function t(){var t=window;t._spf_state&&t._spf_state.config&&(t._spf_state.config["navigate-limit"]=0,t._spf_state.config["navigate-part-received-callback"]=function(t){location.href=t})}t(),window.setInterval(t,1e3)}();';
+script.innerHTML = '!function(){function t(){var t=window;t._spf_state&&t._spf_state.config&&(t._spf_state.config["navigate-limit"]=0,t._spf_state.config["navigate-part-received-callback"]=function(n){t.location.href=n})}t(),window.setInterval(t,1e3)}();';
 document.body.appendChild(script);

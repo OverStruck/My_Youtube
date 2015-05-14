@@ -24,12 +24,10 @@ DB_load(function(upgrade) {
 					});
 				});
 			});
-			return false;
 		} else if (ExtensionData.accounts.length === 0) {
 			chrome.tabs.create({
 				url: "options.html"
 			});
-			return false;
 		}
 
 		var totalNewVideos = 0;

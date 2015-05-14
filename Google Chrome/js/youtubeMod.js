@@ -28,6 +28,11 @@ function init(response) {
             userName = userName.getAttribute('data-channel-external-id');
             userName = userName.trim();
         }
+        if (userName === null || userName === undefined) {
+            console.log("My Youtube Mod Error: Could not find username");
+            return;
+        }
+        
         for (var i = channels.length - 1; i >= 0; i--) {
             if (userName === channels[i].id) {
                 isNewYoutuber = false;

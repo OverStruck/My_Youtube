@@ -1,6 +1,6 @@
 ﻿/* 
   My Youtube (Google Chrome) background.js file 
-  Last update 5/12/2015
+  Last update 5/13/2015
 
   This is the brain file of the extension
   it is akin to main.js in firefox extensions
@@ -31,15 +31,6 @@ DB_load(function(upgrade) {
 			});
 			return false;
 		}
-
-		//create menu
-		chrome.contextMenus.create({
-			id: "mark-as-watched",
-			title: chrome.i18n.getMessage('contextMenu'),
-			contexts: ["image"],
-			documentUrlPatterns: ["chrome-extension://*/nyz_popup.html"],
-			targetUrlPatterns: ["https://*.ytimg.com/*/mqdefault.jpg", "http://*.ytimg.com/*/mqdefault.jpg"]
-		});
 
 		var totalNewVideos = 0;
 		var newVideosHash = '';
@@ -239,7 +230,7 @@ DB_load(function(upgrade) {
             return true;
         }
 
-		var filter = {
+		/*var filter = {
 		    url: [
 		    	{
 		        	hostContains: 'youtube.com',
@@ -261,7 +252,7 @@ DB_load(function(upgrade) {
 			and as a result the content script is not loaded when the user is navigating 
 			through youtube. see: http://stackoverflow.com/questions/15824909/curious-about-the-new-way-youtube-is-loading-pages
 		*/
-		chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
+		/*chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
 			chrome.tabs.getSelected(null, function(tab) { 
 				var newUrl = tab.url;
 				var tabId = details.tabId;
@@ -270,7 +261,7 @@ DB_load(function(upgrade) {
 				}
 			});
 			
-		}, filter);
+		}, filter);*/
 
 		chrome.runtime.onMessage.addListener(
 			function(request, sender, sendResponse) {

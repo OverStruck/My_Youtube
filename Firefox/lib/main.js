@@ -20,16 +20,6 @@ tmr.setTimeout(function() {
     //});
 
 //---------required modules & setup -------------------------------
-		var {modelFor} = require("sdk/model/core");
-		var {viewFor} = require("sdk/view/core");
-		var tab_utils = require("sdk/tabs/utils");
-
-		var { Class } = require('sdk/core/heritage');
-		var { Unknown } = require('sdk/platform/xpcom');
-		var { Cc, Ci, Cu } = require('chrome');
-		Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
-		//var utils = require('sdk/window/utils');
 
         var {ToggleButton} = require('sdk/ui/button/toggle');
         var {Panel} = require("sdk/panel"); //panel (for main popup)
@@ -106,37 +96,18 @@ tmr.setTimeout(function() {
                 }
             }
         });
-
-
-		/*function listenToYoutube(tab) {
-			//map high level tab to low level XUL tab
-		  	var lowLevelTab = viewFor(tab);
-		  	var gBrowser = tab_utils.getBrowserForTab(lowLevelTab);
-
-			//object which implements nsIWebProgressListener
-			//https://developer.mozilla.org/en-US/Add-ons/Code_snippets/Progress_Listeners
-			//listens to youtube url changes
-			var youtubeListener = {
-				oldURL: null,
-				QueryInterface: XPCOMUtils.generateQI(["nsIWebProgressListener", "nsISupportsWeakReference"]),
-			    onLocationChange: function(aProgress, aRequest, aURI) {
-			    	console.log("onLocationChange CALLED");
-			        if (aURI.spec === this.oldURL) {
-			        	return;
-			        }
-			        console.log("NEW URL: " + aURI.spec);
-			        this.oldURL = aURI.spec;
-			    },
-			    onStateChange: function(aWebProgress, aRequest, aFlag, aStatus) {},
-			    onProgressChange: function(aWebProgress, aRequest, curSelf, maxSelf, curTot, maxTot) {},
-			    onStatusChange: function(aWebProgress, aRequest, aStatus, aMessage) {},
-			    onSecurityChange: function(aWebProgress, aRequest, aState) {}
-			};
-
-			gBrowser.addProgressListener(youtubeListener);
-		}*/
         
         //youtube.com contentscript
+        pageMod.PageMod({
+        	include: [
+        		"https://www.youtube.com/*",
+                "http://www.youtube.com/*",
+        	],
+        	contentScriptWhen: 'end',
+        	contentScriptFile: self.data.url("js/YouTube_Disable_Red_Bar_aka_SPF.js"),
+        	attachTo: 'top'
+        });
+        
         pageMod.PageMod({
             include: [
                 "https://www.youtube.com/watch?v=*",
@@ -147,10 +118,7 @@ tmr.setTimeout(function() {
                 "http://www.youtube.com/channel/*"
             ],
             contentScriptWhen: 'end',
-            contentScriptFile: [
-            	self.data.url("js/YouTube_Disable_Red_Bar_aka_SPF.js"),
-            	self.data.url("js/myYoutubeMod.js")
-            ],
+            contentScriptFile: self.data.url("js/myYoutubeMod.js"),
             contentStyleFile: self.data.url("css/youtubeMod.css"),
             contentScriptOptions: {
                 btnAddTxt: translate('YtModBtnAddTxt'),

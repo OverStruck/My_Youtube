@@ -38,12 +38,12 @@
         if (uw._spf_state && uw._spf_state.config) {
             uw._spf_state.config['navigate-limit'] = 0;
             uw._spf_state.config['navigate-part-received-callback'] = function (targetUrl) {
-                location.href = targetUrl;
+                uw.location.href = targetUrl;
             };
         }
     }
 
     // run it, then set it to run every second
     disableRedBar();
-    window.setInterval(disableRedBar, 502);
+    window.setInterval(disableRedBar, 1000);
 }());
